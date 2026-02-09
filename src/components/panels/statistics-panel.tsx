@@ -50,35 +50,8 @@ export function StatisticsPanel({ numberId }: StatisticsPanelProps) {
     const saved = localStorage.getItem(storageKey);
     if (saved) {
       setStats(JSON.parse(saved));
-    } else {
-      // Generate sample data for demo
-      const sampleSessions: SessionRecord[] = Array.from({ length: 7 }, (_, i) => {
-        const date = new Date();
-        date.setDate(date.getDate() - (6 - i));
-        return {
-          date: date.toISOString().split('T')[0],
-          duration: Math.floor(Math.random() * 600) + 120,
-          digitsTyped: Math.floor(Math.random() * 100) + 20,
-          accuracy: Math.floor(Math.random() * 20) + 80,
-          dpm: Math.floor(Math.random() * 50) + 30,
-        };
-      });
-      
-      const totalDigits = sampleSessions.reduce((sum, s) => sum + s.digitsTyped, 0);
-      const totalTime = sampleSessions.reduce((sum, s) => sum + s.duration, 0);
-      const avgAccuracy = Math.round(sampleSessions.reduce((sum, s) => sum + s.accuracy, 0) / sampleSessions.length);
-      const avgDpm = Math.round(sampleSessions.reduce((sum, s) => sum + s.dpm, 0) / sampleSessions.length);
-      const bestDpm = Math.max(...sampleSessions.map(s => s.dpm));
-
-      setStats({
-        sessions: sampleSessions,
-        totalDigitsTyped: totalDigits,
-        totalTime,
-        averageAccuracy: avgAccuracy,
-        averageDpm: avgDpm,
-        bestDpm,
-      });
     }
+    // No fake data generation - start with empty state
   }, [storageKey]);
 
   const formatDuration = (seconds: number) => {
@@ -103,105 +76,123 @@ export function StatisticsPanel({ numberId }: StatisticsPanelProps) {
         </h2>
       </div>
 
-      {/* Summary stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="card">
-          <div className="flex items-center gap-3 mb-2">
-            <BarChart3 className="w-5 h-5 text-[var(--primary)]" />
-            <span className="text-sm text-[var(--text-muted)]">Total Digits</span>
+      {/* Empty state */}
+      {stats.sessions.length === 0 ? (
+        <div className="flex-1 flex flex-col items-center justify-center py-16">
+          <div className="w-16 h-16 mb-6 rounded-full bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center">
+            <BarChart3 className="w-8 h-8 text-[var(--text-muted)]" />
           </div>
-          <div className="text-2xl font-bold font-mono">{stats.totalDigitsTyped.toLocaleString()}</div>
-        </div>
-        
-        <div className="card">
-          <div className="flex items-center gap-3 mb-2">
-            <Clock className="w-5 h-5 text-[var(--primary)]" />
-            <span className="text-sm text-[var(--text-muted)]">Total Time</span>
+          <h3 className="text-lg font-semibold mb-2">No Statistics Yet</h3>
+          <p className="text-[var(--text-muted)] text-center max-w-sm mb-6">
+            Start practicing to see your statistics here. Use the Practice panel to begin your learning journey.
+          </p>
+          <div className="text-sm text-[var(--text-muted)]">
+            Press <span className="kbd mx-1">Ctrl</span> + <span className="kbd mx-1">T</span> then select <strong>Practice</strong>
           </div>
-          <div className="text-2xl font-bold">{formatDuration(stats.totalTime)}</div>
         </div>
-        
-        <div className="card">
-          <div className="flex items-center gap-3 mb-2">
-            <Target className="w-5 h-5 text-[var(--success)]" />
-            <span className="text-sm text-[var(--text-muted)]">Avg Accuracy</span>
-          </div>
-          <div className="text-2xl font-bold text-[var(--success)]">{stats.averageAccuracy}%</div>
-        </div>
-        
-        <div className="card">
-          <div className="flex items-center gap-3 mb-2">
-            <Zap className="w-5 h-5 text-[var(--warning)]" />
-            <span className="text-sm text-[var(--text-muted)]">Best DPM</span>
-          </div>
-          <div className="text-2xl font-bold text-[var(--warning)]">{stats.bestDpm}</div>
-        </div>
-      </div>
-
-      {/* Chart - simple bar chart */}
-      <div className="mb-8">
-        <h3 className="text-lg font-semibold mb-4">Last 7 Days</h3>
-        <div className="bg-[var(--surface)] rounded-lg border border-[var(--border)] p-4">
-          <div className="flex items-end justify-between gap-2 h-40">
-            {stats.sessions.map((session, i) => (
-              <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                <div 
-                  className="w-full bg-[var(--primary)] rounded-t transition-all hover:bg-[var(--primary-hover)]"
-                  style={{ 
-                    height: `${(session.digitsTyped / maxDigits) * 100}%`,
-                    minHeight: '4px',
-                  }}
-                  title={`${session.digitsTyped} digits`}
-                />
-                <span className="text-xs text-[var(--text-muted)]">
-                  {new Date(session.date).toLocaleDateString('en', { weekday: 'short' })}
-                </span>
+      ) : (
+        <>
+          {/* Summary stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="card">
+              <div className="flex items-center gap-3 mb-2">
+                <BarChart3 className="w-5 h-5 text-[var(--primary)]" />
+                <span className="text-sm text-[var(--text-muted)]">Total Digits</span>
               </div>
-            ))}
+              <div className="text-2xl font-bold font-mono">{stats.totalDigitsTyped.toLocaleString()}</div>
+            </div>
+            
+            <div className="card">
+              <div className="flex items-center gap-3 mb-2">
+                <Clock className="w-5 h-5 text-[var(--primary)]" />
+                <span className="text-sm text-[var(--text-muted)]">Total Time</span>
+              </div>
+              <div className="text-2xl font-bold">{formatDuration(stats.totalTime)}</div>
+            </div>
+            
+            <div className="card">
+              <div className="flex items-center gap-3 mb-2">
+                <Target className="w-5 h-5 text-[var(--success)]" />
+                <span className="text-sm text-[var(--text-muted)]">Avg Accuracy</span>
+              </div>
+              <div className="text-2xl font-bold text-[var(--success)]">{stats.averageAccuracy}%</div>
+            </div>
+            
+            <div className="card">
+              <div className="flex items-center gap-3 mb-2">
+                <Zap className="w-5 h-5 text-[var(--warning)]" />
+                <span className="text-sm text-[var(--text-muted)]">Best DPM</span>
+              </div>
+              <div className="text-2xl font-bold text-[var(--warning)]">{stats.bestDpm}</div>
+            </div>
           </div>
-          <div className="mt-4 flex justify-between text-sm text-[var(--text-muted)]">
-            <span>Digits typed per day</span>
-            <span>Avg: {stats.averageDpm} DPM</span>
-          </div>
-        </div>
-      </div>
 
-      {/* Session history */}
-      <div>
-        <h3 className="text-lg font-semibold mb-4">Session History</h3>
-        <div className="bg-[var(--surface)] rounded-lg border border-[var(--border)] overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-[var(--border)]">
-                <th className="text-left p-3 text-[var(--text-muted)] font-medium">Date</th>
-                <th className="text-right p-3 text-[var(--text-muted)] font-medium">Duration</th>
-                <th className="text-right p-3 text-[var(--text-muted)] font-medium">Digits</th>
-                <th className="text-right p-3 text-[var(--text-muted)] font-medium">Accuracy</th>
-                <th className="text-right p-3 text-[var(--text-muted)] font-medium">DPM</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[...stats.sessions].reverse().map((session, i) => (
-                <tr key={i} className="border-b border-[var(--border)] last:border-0">
-                  <td className="p-3">{new Date(session.date).toLocaleDateString()}</td>
-                  <td className="p-3 text-right font-mono">{formatDuration(session.duration)}</td>
-                  <td className="p-3 text-right font-mono">{session.digitsTyped}</td>
-                  <td className="p-3 text-right font-mono">
-                    <span className={session.accuracy >= 90 ? 'text-[var(--success)]' : ''}>
-                      {session.accuracy}%
+          {/* Chart - simple bar chart */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold mb-4">Last 7 Days</h3>
+            <div className="bg-[var(--surface)] rounded-lg border border-[var(--border)] p-4">
+              <div className="flex items-end justify-between gap-2 h-40">
+                {stats.sessions.map((session, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                    <div 
+                      className="w-full bg-[var(--primary)] rounded-t transition-all hover:bg-[var(--primary-hover)]"
+                      style={{ 
+                        height: `${(session.digitsTyped / maxDigits) * 100}%`,
+                        minHeight: '4px',
+                      }}
+                      title={`${session.digitsTyped} digits`}
+                    />
+                    <span className="text-xs text-[var(--text-muted)]">
+                      {new Date(session.date).toLocaleDateString('en', { weekday: 'short' })}
                     </span>
-                  </td>
-                  <td className="p-3 text-right font-mono">
-                    <span className={session.dpm === stats.bestDpm ? 'text-[var(--warning)]' : ''}>
-                      {session.dpm}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 flex justify-between text-sm text-[var(--text-muted)]">
+                <span>Digits typed per day</span>
+                <span>Avg: {stats.averageDpm} DPM</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Session history */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4">Session History</h3>
+            <div className="bg-[var(--surface)] rounded-lg border border-[var(--border)] overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[var(--border)]">
+                    <th className="text-left p-3 text-[var(--text-muted)] font-medium">Date</th>
+                    <th className="text-right p-3 text-[var(--text-muted)] font-medium">Duration</th>
+                    <th className="text-right p-3 text-[var(--text-muted)] font-medium">Digits</th>
+                    <th className="text-right p-3 text-[var(--text-muted)] font-medium">Accuracy</th>
+                    <th className="text-right p-3 text-[var(--text-muted)] font-medium">DPM</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...stats.sessions].reverse().map((session, i) => (
+                    <tr key={i} className="border-b border-[var(--border)] last:border-0">
+                      <td className="p-3">{new Date(session.date).toLocaleDateString()}</td>
+                      <td className="p-3 text-right font-mono">{formatDuration(session.duration)}</td>
+                      <td className="p-3 text-right font-mono">{session.digitsTyped}</td>
+                      <td className="p-3 text-right font-mono">
+                        <span className={session.accuracy >= 90 ? 'text-[var(--success)]' : ''}>
+                          {session.accuracy}%
+                        </span>
+                      </td>
+                      <td className="p-3 text-right font-mono">
+                        <span className={session.dpm === stats.bestDpm ? 'text-[var(--warning)]' : ''}>
+                          {session.dpm}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

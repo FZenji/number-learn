@@ -22,70 +22,84 @@ export function useKeybindings() {
     jumpToTab,
     toggleKeybindingsModal,
     togglePanelSelector,
+    showPanelSelector,
+    showKeybindingsModal,
   } = useWorkspaceStore();
 
   useEffect(() => {
     const bindings: KeyBinding[] = [
+      // Simple keys (no modifiers needed)
       {
         key: 't',
-        ctrl: true,
         action: () => togglePanelSelector(),
         description: 'New panel',
       },
       {
         key: 'w',
-        ctrl: true,
         action: () => activeTabId && closeTab(activeTabId),
         description: 'Close tab',
-      },
-      {
-        key: 'Tab',
-        ctrl: true,
-        action: () => nextTab(),
-        description: 'Next tab',
-      },
-      {
-        key: 'Tab',
-        ctrl: true,
-        shift: true,
-        action: () => prevTab(),
-        description: 'Previous tab',
       },
       {
         key: '?',
         action: () => toggleKeybindingsModal(),
         description: 'Show keybindings',
       },
-      // Number keys 1-9 for jumping to tabs
+      // Tab switching with Tab key
+      {
+        key: 'Tab',
+        action: () => nextTab(),
+        description: 'Next tab',
+      },
+      {
+        key: 'Tab',
+        shift: true,
+        action: () => prevTab(),
+        description: 'Previous tab',
+      },
+      // Number keys 1-9 for jumping to tabs (no modifier needed)
       ...Array.from({ length: 9 }, (_, i) => ({
         key: String(i + 1),
-        ctrl: true,
         action: () => jumpToTab(i),
         description: `Jump to tab ${i + 1}`,
       })),
     ];
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger shortcuts when typing in inputs
-      if (
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement
-      ) {
-        // Allow Escape to blur inputs
-        if (e.key === 'Escape') {
+      // Handle Escape key globally
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        if (showPanelSelector) {
+          togglePanelSelector();
+          return;
+        }
+        if (showKeybindingsModal) {
+          toggleKeybindingsModal();
+          return;
+        }
+        // Blur focused input
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
           (e.target as HTMLElement).blur();
         }
         return;
       }
 
-      for (const binding of bindings) {
-        const ctrlMatch = binding.ctrl ? (e.ctrlKey || e.metaKey) : !e.ctrlKey && !e.metaKey;
-        const shiftMatch = binding.shift ? e.shiftKey : !e.shiftKey;
-        const altMatch = binding.alt ? e.altKey : !e.altKey;
-        const keyMatch = e.key === binding.key || e.key.toLowerCase() === binding.key.toLowerCase();
+      // Don't trigger shortcuts when typing in inputs
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        return;
+      }
 
-        if (keyMatch && ctrlMatch && shiftMatch && altMatch) {
+      // Check if this is a shortcut we want to capture
+      for (const binding of bindings) {
+        const shiftMatch = binding.shift ? e.shiftKey : !e.shiftKey;
+        const keyMatch = e.key === binding.key || e.key.toLowerCase() === binding.key.toLowerCase();
+        
+        // Don't require Ctrl modifier for our shortcuts
+        if (keyMatch && shiftMatch && !e.ctrlKey && !e.altKey && !e.metaKey) {
           e.preventDefault();
+          e.stopPropagation();
           binding.action();
           return;
         }
@@ -94,15 +108,15 @@ export function useKeybindings() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeTabId, addTab, closeTab, nextTab, prevTab, jumpToTab, toggleKeybindingsModal, togglePanelSelector]);
+  }, [activeTabId, closeTab, nextTab, prevTab, jumpToTab, toggleKeybindingsModal, togglePanelSelector, showPanelSelector, showKeybindingsModal]);
 }
 
 export const KEYBINDING_DOCS: { shortcut: string; description: string }[] = [
-  { shortcut: 'Ctrl + T', description: 'Open new panel' },
-  { shortcut: 'Ctrl + W', description: 'Close current tab' },
-  { shortcut: 'Ctrl + Tab', description: 'Next tab' },
-  { shortcut: 'Ctrl + Shift + Tab', description: 'Previous tab' },
-  { shortcut: 'Ctrl + 1-9', description: 'Jump to tab by number' },
+  { shortcut: 'T', description: 'Open new panel' },
+  { shortcut: 'W', description: 'Close current tab' },
+  { shortcut: 'Tab', description: 'Next tab' },
+  { shortcut: 'Shift + Tab', description: 'Previous tab' },
+  { shortcut: '1-9', description: 'Jump to tab by number' },
   { shortcut: '?', description: 'Show keyboard shortcuts' },
-  { shortcut: 'Escape', description: 'Clear focus / close modals' },
+  { shortcut: 'Escape', description: 'Close modals / clear focus' },
 ];

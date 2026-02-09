@@ -9,7 +9,7 @@ export function TabBar() {
   if (tabs.length === 0) {
     return (
       <div className="flex-1 px-4 py-2 text-sm text-[var(--text-muted)]">
-        Press Ctrl+T to open a panel
+        Press T to open a panel
       </div>
     );
   }
@@ -17,12 +17,12 @@ export function TabBar() {
   return (
     <div className="flex-1 flex items-center overflow-x-auto scrollbar-hide">
       {tabs.map((tab, index) => (
-        <button
+        <div
           key={tab.id}
           onClick={() => setActiveTab(tab.id)}
           className={`
             group flex items-center gap-2 px-4 py-3 min-w-[120px] max-w-[200px]
-            border-r border-[var(--border)] transition-colors
+            border-r border-[var(--border)] transition-colors cursor-pointer
             ${activeTabId === tab.id 
               ? 'bg-[var(--surface)] text-[var(--text-primary)] border-b-2 border-b-[var(--primary)]' 
               : 'hover:bg-[var(--surface-hover)] text-[var(--text-secondary)]'
@@ -37,11 +37,11 @@ export function TabBar() {
               closeTab(tab.id);
             }}
             className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-[var(--surface-active)] transition-opacity"
-            title="Close tab (Ctrl+W)"
+            title="Close tab (W)"
           >
             <X className="w-3 h-3" />
           </button>
-        </button>
+        </div>
       ))}
     </div>
   );

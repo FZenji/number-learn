@@ -6,12 +6,14 @@ import {
   Brain, 
   Keyboard, 
   Layers, 
-  Edit3, 
+  FileText,
+  Paintbrush,
   TrendingUp, 
   BarChart3, 
   Hash, 
-  FileText,
+  AlignLeft,
   Clock,
+  Music,
   X,
 } from 'lucide-react';
 
@@ -22,6 +24,8 @@ interface PanelOption {
   icon: React.ReactNode;
 }
 
+// Order: Digit Display, Sequence Practice, Chunk Trainer, Practice Typing, Recall Test, 
+// Canvas, Notes, Number Timeline, Progress Tracker, Statistics, Major System, Piem Generator
 const PANEL_OPTIONS: PanelOption[] = [
   {
     type: 'digit-display',
@@ -30,16 +34,10 @@ const PANEL_OPTIONS: PanelOption[] = [
     icon: <Eye className="w-5 h-5" />,
   },
   {
-    type: 'recall-test',
-    title: 'Recall Test',
-    description: 'Test your memory with position quizzes',
-    icon: <Brain className="w-5 h-5" />,
-  },
-  {
-    type: 'practice',
-    title: 'Practice Typing',
-    description: 'Type digits with real-time feedback',
-    icon: <Keyboard className="w-5 h-5" />,
+    type: 'sequence',
+    title: 'Sequence Practice',
+    description: 'Audio-visual sequence with numpad grid',
+    icon: <Music className="w-5 h-5" />,
   },
   {
     type: 'chunk-trainer',
@@ -48,10 +46,28 @@ const PANEL_OPTIONS: PanelOption[] = [
     icon: <Layers className="w-5 h-5" />,
   },
   {
-    type: 'scratchpad',
-    title: 'Scratchpad',
-    description: 'Freeform notes and annotations',
-    icon: <Edit3 className="w-5 h-5" />,
+    type: 'practice',
+    title: 'Practice Typing',
+    description: 'Type digits with real-time feedback',
+    icon: <Keyboard className="w-5 h-5" />,
+  },
+  {
+    type: 'recall-test',
+    title: 'Recall Test',
+    description: 'Test your memory with position quizzes',
+    icon: <Brain className="w-5 h-5" />,
+  },
+  {
+    type: 'canvas',
+    title: 'Canvas',
+    description: 'Draw diagrams and visual mnemonics',
+    icon: <Paintbrush className="w-5 h-5" />,
+  },
+  {
+    type: 'notes',
+    title: 'Notes',
+    description: 'Text notes and mnemonic strategies',
+    icon: <FileText className="w-5 h-5" />,
   },
   {
     type: 'timeline',
@@ -81,7 +97,7 @@ const PANEL_OPTIONS: PanelOption[] = [
     type: 'piem',
     title: 'Piem Generator',
     description: 'Create poems where word lengths = digits',
-    icon: <FileText className="w-5 h-5" />,
+    icon: <AlignLeft className="w-5 h-5" />,
   },
 ];
 

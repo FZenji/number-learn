@@ -2,8 +2,8 @@
 
 import { useWorkspaceStore } from '@/store/workspace-store';
 import { MATH_CONSTANTS } from '@/data/numbers';
-import { Plus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import { Plus, Trash2, Upload } from 'lucide-react';
+import { useState, useRef } from 'react';
 
 interface NumberSelectorProps {
   collapsed?: boolean;
@@ -21,6 +21,7 @@ export function NumberSelector({ collapsed = false }: NumberSelectorProps) {
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customName, setCustomName] = useState('');
   const [customDigits, setCustomDigits] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddCustom = () => {
     if (customName.trim() && customDigits.trim()) {
@@ -28,6 +29,55 @@ export function NumberSelector({ collapsed = false }: NumberSelectorProps) {
       setCustomName('');
       setCustomDigits('');
       setShowCustomInput(false);
+    }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (max 1MB)
+    if (file.size > 1024 * 1024) {
+      alert('File is too large. Max size is 1MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const content = event.target?.result as string;
+        let digits = '';
+        let name = file.name.replace(/\.[^/.]+$/, ''); // Remove extension
+
+        if (file.name.endsWith('.json')) {
+          const json = JSON.parse(content);
+          // Support { digits: "..." } or { value: "..." } or just a string
+          digits = json.digits || json.value || (typeof json === 'string' ? json : '');
+          if (json.name) name = json.name;
+        } else if (file.name.endsWith('.csv')) {
+          // Parse CSV - assume first column is digits, ignore header if present
+          const lines = content.trim().split('\n');
+          digits = lines.map(line => line.split(',')[0]).join('').replace(/[^0-9.]/g, '');
+        } else {
+          // Plain text - extract only digits and decimal points
+          digits = content.replace(/[^0-9.]/g, '');
+        }
+
+        if (digits.length < 2) {
+          alert('Could not extract valid digits from the file.');
+          return;
+        }
+
+        addCustomNumber(name, digits);
+      } catch (error) {
+        alert('Error parsing file. Please check the format.');
+      }
+    };
+
+    reader.readAsText(file);
+    // Reset input to allow re-uploading same file
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -138,12 +188,31 @@ export function NumberSelector({ collapsed = false }: NumberSelectorProps) {
           ) : (
             <button
               onClick={() => setShowCustomInput(true)}
-              className="w-full flex items-center justify-center gap-2 p-2 rounded-md border border-dashed border-[var(--border)] hover:border-[var(--border-hover)] text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+              className="w-full flex items-center justify-center gap-2 p-2 rounded-md border border-dashed border-[var(--border)] hover:border-[var(--border-hover)] text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors mb-2"
             >
               <Plus className="w-4 h-4" />
               <span className="text-sm">Add Custom</span>
             </button>
           )}
+          
+          {/* File upload */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".txt,.csv,.json"
+            onChange={handleFileUpload}
+            className="hidden"
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full flex items-center justify-center gap-2 p-2 rounded-md bg-[var(--surface)] border border-[var(--border)] hover:border-[var(--border-hover)] text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+          >
+            <Upload className="w-4 h-4" />
+            <span className="text-sm">Upload File</span>
+          </button>
+          <p className="text-xs text-[var(--text-muted)] text-center mt-2">
+            .txt, .csv, or .json (max 1MB)
+          </p>
         </div>
       )}
     </div>

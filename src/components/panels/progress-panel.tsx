@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { MATH_CONSTANTS, getDigitsOnly } from '@/data/numbers';
 import { useWorkspaceStore } from '@/store/workspace-store';
-import { Trophy, Flame, Target, TrendingUp } from 'lucide-react';
+import { Trophy, Flame, Target, TrendingUp, Edit2, Check } from 'lucide-react';
 
 interface ProgressPanelProps {
   numberId: string;
@@ -16,6 +16,7 @@ interface ProgressData {
   totalPracticeTime: number;
   lastPracticeDate: string | null;
   chunksmastered: number[];
+  customTarget?: number;
 }
 
 export function ProgressPanel({ numberId }: ProgressPanelProps) {
@@ -27,7 +28,10 @@ export function ProgressPanel({ numberId }: ProgressPanelProps) {
     totalPracticeTime: 0,
     lastPracticeDate: null,
     chunksmastered: [],
+    customTarget: undefined,
   });
+  const [isEditingTarget, setIsEditingTarget] = useState(false);
+  const [targetInput, setTargetInput] = useState('');
 
   const number = useMemo(() => {
     const builtIn = MATH_CONSTANTS.find(c => c.id === numberId);
@@ -135,7 +139,78 @@ export function ProgressPanel({ numberId }: ProgressPanelProps) {
         </div>
       </div>
 
-      {/* Progress bar */}
+      {/* Custom Target */}
+      <div className="mb-8">
+        <div className="flex items-center gap-2 mb-2">
+          <h3 className="text-lg font-semibold">Your Target</h3>
+          {isEditingTarget ? (
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min={1}
+                max={totalDigits}
+                value={targetInput}
+                onChange={(e) => setTargetInput(e.target.value)}
+                className="input w-24 py-1"
+                placeholder="100"
+                autoFocus
+              />
+              <button
+                onClick={() => {
+                  const target = Math.min(Math.max(1, parseInt(targetInput) || 100), totalDigits);
+                  const newProgress = { ...progress, customTarget: target };
+                  setProgress(newProgress);
+                  localStorage.setItem(storageKey, JSON.stringify(newProgress));
+                  setIsEditingTarget(false);
+                }}
+                className="btn btn-primary p-1"
+              >
+                <Check className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => {
+                setTargetInput(String(progress.customTarget || 100));
+                setIsEditingTarget(true);
+              }}
+              className="btn btn-ghost p-1"
+            >
+              <Edit2 className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+        
+        {progress.customTarget ? (
+          <>
+            <div className="flex justify-between text-sm text-[var(--text-muted)] mb-2">
+              <span>Progress to target</span>
+              <span>{progress.digitsLearned} / {progress.customTarget} digits</span>
+            </div>
+            <div className="h-6 bg-[var(--surface)] rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-[var(--primary)] to-[var(--success)] transition-all duration-500 flex items-center justify-end pr-2"
+                style={{ width: `${Math.min(100, (progress.digitsLearned / progress.customTarget) * 100)}%` }}
+              >
+                {progress.digitsLearned >= progress.customTarget && (
+                  <span className="text-xs font-bold">🎉</span>
+                )}
+              </div>
+            </div>
+            {progress.digitsLearned >= progress.customTarget && (
+              <div className="mt-2 text-center text-[var(--success)] font-medium animate-fade-in">
+                🎉 Target reached! Set a new goal to keep going!
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="p-4 bg-[var(--surface)] rounded-lg border border-[var(--border)] text-center text-[var(--text-muted)]">
+            Set a custom target to track your goal!
+          </div>
+        )}
+      </div>
+
+      {/* Overall Progress bar */}
       <div className="mb-8">
         <div className="flex justify-between text-sm text-[var(--text-muted)] mb-2">
           <span>Overall Progress</span>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import {
   ClerkProvider,
@@ -71,7 +72,12 @@ export default function RootLayout({
                 </SignUpButton>
               </SignedOut>
               <SignedIn>
-                <a href="/studio" className="btn btn-ghost">Studio</a>
+                <Link href="/studio" className="btn btn-primary">
+                  Studio
+                </Link>
+                <Link href="/contact" className="btn btn-ghost">
+                  Contact
+                </Link>
                 <UserButton 
                   afterSignOutUrl="/"
                   appearance={{
@@ -86,9 +92,6 @@ export default function RootLayout({
           <main className="pt-[72px]">
             {children}
           </main>
-          <footer className="py-8 text-center text-[var(--text-muted)] text-sm border-t border-[var(--border)]">
-            <p>Developed by <strong>Henry Tolenaar</strong></p>
-          </footer>
         </body>
       </html>
     </ClerkProvider>

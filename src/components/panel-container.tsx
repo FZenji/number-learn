@@ -6,11 +6,14 @@ import { RecallTestPanel } from '@/components/panels/recall-test-panel';
 import { PracticePanel } from '@/components/panels/practice-panel';
 import { ChunkTrainerPanel } from '@/components/panels/chunk-trainer-panel';
 import { ScratchpadPanel } from '@/components/panels/scratchpad-panel';
+import { NotesPanel } from '@/components/panels/notes-panel';
+import { CanvasPanel } from '@/components/panels/canvas-panel';
 import { TimelinePanel } from '@/components/panels/timeline-panel';
 import { ProgressPanel } from '@/components/panels/progress-panel';
 import { StatisticsPanel } from '@/components/panels/statistics-panel';
 import { MajorSystemPanel } from '@/components/panels/major-system-panel';
 import { PiemPanel } from '@/components/panels/piem-panel';
+import { SequencePanel } from '@/components/panels/sequence-panel';
 
 interface PanelContainerProps {
   tab: Tab;
@@ -23,11 +26,14 @@ export function PanelContainer({ tab }: PanelContainerProps) {
     'practice': PracticePanel,
     'chunk-trainer': ChunkTrainerPanel,
     'scratchpad': ScratchpadPanel,
+    'notes': NotesPanel,
+    'canvas': CanvasPanel,
     'timeline': TimelinePanel,
     'progress': ProgressPanel,
     'statistics': StatisticsPanel,
     'major-system': MajorSystemPanel,
     'piem': PiemPanel,
+    'sequence': SequencePanel,
   };
 
   const PanelComponent = panelComponents[tab.panelType];

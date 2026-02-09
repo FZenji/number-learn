@@ -143,6 +143,11 @@ export default function HomePage() {
           </SignedIn>
         </div>
       </section>
+
+      {/* Footer - only shown on landing page */}
+      <footer className="py-8 text-center text-[var(--text-muted)] text-sm border-t border-[var(--border)]">
+        <p>Developed by <strong>Henry Tolenaar</strong></p>
+      </footer>
     </div>
   );
 }

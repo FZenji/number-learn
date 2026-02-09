@@ -8,11 +8,14 @@ export type PanelType =
   | 'practice'
   | 'chunk-trainer'
   | 'scratchpad'
+  | 'notes'
+  | 'canvas'
   | 'timeline'
   | 'progress'
   | 'statistics'
   | 'major-system'
-  | 'piem';
+  | 'piem'
+  | 'sequence';
 
 export interface Tab {
   id: string;
@@ -66,11 +69,14 @@ const PANEL_TITLES: Record<PanelType, string> = {
   'practice': 'Practice',
   'chunk-trainer': 'Chunks',
   'scratchpad': 'Scratchpad',
+  'notes': 'Notes',
+  'canvas': 'Canvas',
   'timeline': 'Timeline',
   'progress': 'Progress',
   'statistics': 'Statistics',
   'major-system': 'Major System',
   'piem': 'Piem',
+  'sequence': 'Sequence',
 };
 
 function generateId(): string {
@@ -93,8 +99,19 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       addTab: (panelType, numberId) => {
         const id = generateId();
         const numId = numberId || get().selectedNumberId;
-        const number = get().getSelectedNumber();
-        const symbol = MATH_CONSTANTS.find(c => c.id === numId)?.symbol || '?';
+        
+        // Find the symbol/name for the tab title
+        let symbol = '?';
+        const builtIn = MATH_CONSTANTS.find(c => c.id === numId);
+        if (builtIn) {
+          symbol = builtIn.symbol;
+        } else {
+          // Check for custom number
+          const customNum = get().customNumbers.find(c => c.id === numId);
+          if (customNum) {
+            symbol = customNum.name;
+          }
+        }
         
         const newTab: Tab = {
           id,

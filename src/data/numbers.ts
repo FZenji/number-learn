@@ -48,6 +48,38 @@ export const MATH_CONSTANTS: MathConstant[] = [
     history: "First studied by Euler in 1735 and later by Lorenzo Mascheroni. It's unknown whether γ is irrational.",
     digits: "0.5772156649015328606065120900824024310421593359399235988057672348848677267776646709369470632917467495146314472498070824809605040144865428362241739976449235362535003337429373377376739427925952582470949160087352039481656708532331517766115286211995015079847937450857057400299213547861466940296043254215190587755352673313992540129674205137541395491116851028079842348775872050384310939973613725530608893312676001724795378367592713515772261027349291394079843010341777177808815495706610750101619166334015227893586796549725203621287922655595366962817638879272680132431010476505963703947394957638906572967929601009015125195950922243501409349871228247949747195646976318506676129063811051824197444867836380861749455169892792301877391072945781554316005002182844096053772434203285478367015177394398700302370339518328690001558193988042707411542227819716523011073565833967348717650491941812300040654693142999297779569303100503086303418569803231083691640025892970890985486825777364288253954925873629596133298574739302",
   },
+  {
+    id: "avogadro",
+    name: "Avogadro's Number",
+    symbol: "NA",
+    description: "The number of particles in one mole of a substance",
+    history: "Named after Amedeo Avogadro. Precisely defined in 2019 as exactly 6.02214076×10²³.",
+    digits: "6.02214076",
+  },
+  {
+    id: "speed-of-light",
+    name: "Speed of Light",
+    symbol: "c",
+    description: "The speed of light in vacuum, a fundamental constant of nature",
+    history: "Ole Rømer first demonstrated that light has a finite speed in 1676. Now defined exactly as 299,792,458 m/s.",
+    digits: "299792458",
+  },
+  {
+    id: "planck",
+    name: "Planck's Constant",
+    symbol: "h",
+    description: "The quantum of electromagnetic action relating photon energy to frequency",
+    history: "Introduced by Max Planck in 1900 as part of his derivation of Planck's law of black-body radiation.",
+    digits: "6.62607015",
+  },
+  {
+    id: "fine-structure",
+    name: "Fine Structure Constant",
+    symbol: "α",
+    description: "The fundamental physical constant characterizing the strength of electromagnetic interaction",
+    history: "Introduced by Arnold Sommerfeld in 1916. Its value is approximately 1/137.",
+    digits: "0.00729735256930314559615441676826746614520239735431",
+  },
 ];
 
 // Major System: consonant sounds for each digit

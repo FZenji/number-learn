@@ -60,7 +60,7 @@ export default function StudioPage() {
         `}
       >
         <div className="h-full flex flex-col">
-          <div className="p-3 border-b border-[var(--border)] flex items-center justify-between">
+          <div className="px-3 py-3 border-b border-[var(--border)] flex items-center justify-between min-h-[48px]">
             {!sidebarCollapsed && (
               <span className="text-sm font-medium text-[var(--text-secondary)]">Numbers</span>
             )}

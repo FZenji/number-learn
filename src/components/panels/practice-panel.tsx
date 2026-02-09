@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { MATH_CONSTANTS, getDigitsOnly } from '@/data/numbers';
 import { useWorkspaceStore } from '@/store/workspace-store';
-import { RotateCcw, Play, Pause } from 'lucide-react';
+import { RotateCcw, Play, Pause, Eye, EyeOff } from 'lucide-react';
 
 interface PracticePanelProps {
   numberId: string;
@@ -16,6 +16,7 @@ export function PracticePanel({ numberId }: PracticePanelProps) {
   const [startTime, setStartTime] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [mistakes, setMistakes] = useState<number[]>([]);
+  const [showReference, setShowReference] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const number = useMemo(() => {
@@ -119,6 +120,14 @@ export function PracticePanel({ numberId }: PracticePanelProps) {
             <RotateCcw className="w-4 h-4" />
             Reset
           </button>
+          <button 
+            onClick={() => setShowReference(!showReference)} 
+            className="btn btn-ghost"
+            title={showReference ? "Hide reference" : "Show reference"}
+          >
+            {showReference ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            {showReference ? 'Hide' : 'Show'}
+          </button>
         </div>
       </div>
 
@@ -145,23 +154,25 @@ export function PracticePanel({ numberId }: PracticePanelProps) {
       </div>
 
       {/* Reference display */}
-      <div className="mb-4 p-4 bg-[var(--surface)] rounded-lg border border-[var(--border)]">
-        <div className="text-xs text-[var(--text-muted)] mb-2">Reference (first 100 digits)</div>
-        <div className="font-mono text-sm leading-relaxed tracking-wider overflow-x-auto">
-          {digits.slice(0, 100).split('').map((digit, i) => (
-            <span
-              key={i}
-              className={`
-                ${i < userInput.length ? 'text-[var(--success)]' : 'text-[var(--text-muted)]'}
-                ${i === userInput.length ? 'bg-[var(--primary)] text-white px-1 rounded' : ''}
-              `}
-            >
-              {digit}
-            </span>
-          ))}
-          {digits.length > 100 && <span className="text-[var(--text-muted)]">...</span>}
+      {showReference && (
+        <div className="mb-4 p-4 bg-[var(--surface)] rounded-lg border border-[var(--border)]">
+          <div className="text-xs text-[var(--text-muted)] mb-2">Reference (first 100 digits)</div>
+          <div className="font-mono text-sm leading-relaxed tracking-wider overflow-x-auto">
+            {digits.slice(0, 100).split('').map((digit, i) => (
+              <span
+                key={i}
+                className={`
+                  ${i < userInput.length ? 'text-[var(--success)]' : 'text-[var(--text-muted)]'}
+                  ${i === userInput.length ? 'bg-[var(--primary)] text-white px-1 rounded' : ''}
+                `}
+              >
+                {digit}
+              </span>
+            ))}
+            {digits.length > 100 && <span className="text-[var(--text-muted)]">...</span>}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Input area */}
       <div className="flex-1 flex flex-col">
