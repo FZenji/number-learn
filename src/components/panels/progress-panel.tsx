@@ -1,0 +1,219 @@
+'use client';
+
+import { useState, useMemo, useEffect } from 'react';
+import { MATH_CONSTANTS, getDigitsOnly } from '@/data/numbers';
+import { useWorkspaceStore } from '@/store/workspace-store';
+import { Trophy, Flame, Target, TrendingUp } from 'lucide-react';
+
+interface ProgressPanelProps {
+  numberId: string;
+}
+
+interface ProgressData {
+  digitsLearned: number;
+  currentStreak: number;
+  bestStreak: number;
+  totalPracticeTime: number;
+  lastPracticeDate: string | null;
+  chunksmastered: number[];
+}
+
+export function ProgressPanel({ numberId }: ProgressPanelProps) {
+  const { customNumbers } = useWorkspaceStore();
+  const [progress, setProgress] = useState<ProgressData>({
+    digitsLearned: 0,
+    currentStreak: 0,
+    bestStreak: 0,
+    totalPracticeTime: 0,
+    lastPracticeDate: null,
+    chunksmastered: [],
+  });
+
+  const number = useMemo(() => {
+    const builtIn = MATH_CONSTANTS.find(c => c.id === numberId);
+    if (builtIn) return builtIn;
+    return customNumbers.find(c => c.id === numberId);
+  }, [numberId, customNumbers]);
+
+  const storageKey = `progress-${numberId}`;
+
+  // Load progress
+  useEffect(() => {
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      setProgress(JSON.parse(saved));
+    }
+  }, [storageKey]);
+
+  // Calculate streak
+  const isActiveToday = useMemo(() => {
+    if (!progress.lastPracticeDate) return false;
+    const today = new Date().toDateString();
+    return progress.lastPracticeDate === today;
+  }, [progress.lastPracticeDate]);
+
+  const goals = [
+    { name: 'First 10 digits', target: 10, icon: <Target className="w-5 h-5" /> },
+    { name: 'First 50 digits', target: 50, icon: <Target className="w-5 h-5" /> },
+    { name: 'First 100 digits', target: 100, icon: <Trophy className="w-5 h-5" /> },
+    { name: '3-day streak', target: 3, current: progress.currentStreak, icon: <Flame className="w-5 h-5" /> },
+    { name: '7-day streak', target: 7, current: progress.currentStreak, icon: <Flame className="w-5 h-5" /> },
+  ];
+
+  // Simulated progress for demo
+  const updateProgress = (digits: number) => {
+    const today = new Date().toDateString();
+    const newProgress = {
+      ...progress,
+      digitsLearned: Math.max(progress.digitsLearned, digits),
+      lastPracticeDate: today,
+      currentStreak: progress.lastPracticeDate === today 
+        ? progress.currentStreak 
+        : progress.currentStreak + 1,
+      bestStreak: Math.max(progress.bestStreak, progress.currentStreak + 1),
+    };
+    setProgress(newProgress);
+    localStorage.setItem(storageKey, JSON.stringify(newProgress));
+  };
+
+  if (!number) {
+    return <div className="text-[var(--text-muted)]">Number not found</div>;
+  }
+
+  const totalDigits = number ? getDigitsOnly(number).length : 1000;
+
+  return (
+    <div className="h-full flex flex-col overflow-y-auto">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-semibold">
+          Progress - {number.name}
+        </h2>
+        <div className="flex items-center gap-2">
+          {isActiveToday && (
+            <span className="px-3 py-1 bg-[var(--success)]/20 text-[var(--success)] rounded-full text-sm">
+              Active today ✓
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Stats grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="card text-center">
+          <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-[var(--primary)]/20 flex items-center justify-center">
+            <TrendingUp className="w-6 h-6 text-[var(--primary)]" />
+          </div>
+          <div className="text-3xl font-bold font-mono">{progress.digitsLearned}</div>
+          <div className="text-sm text-[var(--text-muted)]">Digits Learned</div>
+        </div>
+        
+        <div className="card text-center">
+          <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-[var(--warning)]/20 flex items-center justify-center">
+            <Flame className="w-6 h-6 text-[var(--warning)]" />
+          </div>
+          <div className="text-3xl font-bold font-mono">{progress.currentStreak}</div>
+          <div className="text-sm text-[var(--text-muted)]">Day Streak</div>
+        </div>
+        
+        <div className="card text-center">
+          <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-[var(--success)]/20 flex items-center justify-center">
+            <Trophy className="w-6 h-6 text-[var(--success)]" />
+          </div>
+          <div className="text-3xl font-bold font-mono">{progress.bestStreak}</div>
+          <div className="text-sm text-[var(--text-muted)]">Best Streak</div>
+        </div>
+        
+        <div className="card text-center">
+          <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-[var(--primary)]/20 flex items-center justify-center">
+            <Target className="w-6 h-6 text-[var(--primary)]" />
+          </div>
+          <div className="text-3xl font-bold font-mono">
+            {Math.round((progress.digitsLearned / totalDigits) * 100)}%
+          </div>
+          <div className="text-sm text-[var(--text-muted)]">Complete</div>
+        </div>
+      </div>
+
+      {/* Progress bar */}
+      <div className="mb-8">
+        <div className="flex justify-between text-sm text-[var(--text-muted)] mb-2">
+          <span>Overall Progress</span>
+          <span>{progress.digitsLearned} / {totalDigits} digits</span>
+        </div>
+        <div className="h-4 bg-[var(--surface)] rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-gradient-to-r from-[var(--primary)] to-[var(--success)] transition-all duration-500"
+            style={{ width: `${Math.min(100, (progress.digitsLearned / totalDigits) * 100)}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Goals */}
+      <div className="mb-8">
+        <h3 className="text-lg font-semibold mb-4">Goals & Achievements</h3>
+        <div className="space-y-3">
+          {goals.map((goal, i) => {
+            const current = goal.current !== undefined ? goal.current : progress.digitsLearned;
+            const completed = current >= goal.target;
+            const progressPercent = Math.min(100, (current / goal.target) * 100);
+            
+            return (
+              <div 
+                key={i}
+                className={`
+                  p-4 rounded-lg border transition-colors
+                  ${completed 
+                    ? 'bg-[var(--success)]/10 border-[var(--success)]' 
+                    : 'bg-[var(--surface)] border-[var(--border)]'
+                  }
+                `}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={completed ? 'text-[var(--success)]' : 'text-[var(--text-muted)]'}>
+                    {goal.icon}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between mb-1">
+                      <span className={completed ? 'text-[var(--success)]' : ''}>
+                        {goal.name}
+                      </span>
+                      <span className="text-sm text-[var(--text-muted)]">
+                        {current} / {goal.target}
+                      </span>
+                    </div>
+                    <div className="h-2 bg-[var(--background)] rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full transition-all ${completed ? 'bg-[var(--success)]' : 'bg-[var(--primary)]'}`}
+                        style={{ width: `${progressPercent}%` }}
+                      />
+                    </div>
+                  </div>
+                  {completed && (
+                    <span className="text-[var(--success)]">✓</span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Quick actions for demo */}
+      <div className="mt-auto pt-4 border-t border-[var(--border)]">
+        <p className="text-sm text-[var(--text-muted)] mb-3">Demo: Update your progress</p>
+        <div className="flex gap-2 flex-wrap">
+          {[10, 25, 50, 100].map(n => (
+            <button
+              key={n}
+              onClick={() => updateProgress(n)}
+              className="btn btn-secondary text-sm"
+            >
+              Set {n} digits
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
