@@ -28,6 +28,14 @@ export const metadata: Metadata = {
   keywords: ["pi memorization", "euler number", "golden ratio", "math constants", "memory training", "mnemonic techniques"],
   authors: [{ name: "Henry Tolenaar" }],
   creator: "Henry Tolenaar",
+  icons: {
+    icon: [
+      { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
+      { url: '/web-app-manifest-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/web-app-manifest-512x512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
   openGraph: {
     title: "Number Learn Studio",
     description: "Master mathematical constants with proven mnemonic techniques",
@@ -44,8 +52,7 @@ export const metadata: Metadata = {
   },
 };
 
-// Force dynamic rendering to support Clerk keyless mode during development
-export const dynamic = 'force-dynamic';
+
 
 export default function RootLayout({
   children,

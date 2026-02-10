@@ -4,50 +4,56 @@ import { useEffect } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import { redirect } from 'next/navigation';
 import { useWorkspaceStore } from '@/store/workspace-store';
-import { useKeybindings } from '@/hooks/use-keybindings';
-import { TabBar } from '@/components/tab-bar';
+import { useKeybindings, registerSplitActions, unregisterSplitActions, registerPanelSelectorAction, unregisterPanelSelectorAction } from '@/hooks/use-keybindings';
 import { NumberSelector } from '@/components/number-selector';
-import { PanelContainer } from '@/components/panel-container';
 import { PanelSelector } from '@/components/panel-selector';
 import { KeybindingsModal } from '@/components/keybindings-modal';
-import { Menu, Plus } from 'lucide-react';
+import { SplitPanelProvider, useSplitPanel } from '@/components/split-panel-context';
+import { SplitPanelLayout } from '@/components/split-panel-layout';
+import { Menu } from 'lucide-react';
 
-export default function StudioPage() {
-  const { isLoaded, isSignedIn } = useAuth();
+function StudioContent() {
   const {
-    tabs,
-    activeTabId,
     sidebarCollapsed,
     showKeybindingsModal,
-    showPanelSelector,
     toggleSidebar,
-    togglePanelSelector,
     toggleKeybindingsModal,
   } = useWorkspaceStore();
 
-  // Initialize keybindings
+  const {
+    activeGroupId,
+    showPanelSelectorForGroup,
+    closePanelSelector,
+    splitGroup,
+    addTabToGroup,
+    openPanelSelectorForGroup,
+    initialize,
+  } = useSplitPanel();
+
+  // Initialize the first editor group on mount
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
+  // Keybindings
   useKeybindings();
 
-  // Redirect if not authenticated
+  // Register split actions
   useEffect(() => {
-    if (isLoaded && !isSignedIn) {
-      redirect('/');
-    }
-  }, [isLoaded, isSignedIn]);
+    registerSplitActions({
+      splitHorizontal: () => activeGroupId && splitGroup(activeGroupId, 'horizontal'),
+      splitVertical: () => activeGroupId && splitGroup(activeGroupId, 'vertical'),
+    });
+    return () => unregisterSplitActions();
+  }, [activeGroupId, splitGroup]);
 
-  if (!isLoaded) {
-    return (
-      <div className="flex items-center justify-center min-h-[calc(100vh-72px)]">
-        <div className="animate-pulse text-[var(--text-muted)]">Loading...</div>
-      </div>
-    );
-  }
-
-  if (!isSignedIn) {
-    return null;
-  }
-
-  const activeTab = tabs.find(t => t.id === activeTabId);
+  // Register T shortcut -> panel selector for active group
+  useEffect(() => {
+    registerPanelSelectorAction(() => {
+      if (activeGroupId) openPanelSelectorForGroup(activeGroupId);
+    });
+    return () => unregisterPanelSelectorAction();
+  }, [activeGroupId, openPanelSelectorForGroup]);
 
   return (
     <div className="flex h-[calc(100vh-72px)]">
@@ -90,42 +96,48 @@ export default function StudioPage() {
         </div>
       </aside>
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Tab bar */}
-        <div className="flex items-center border-b border-[var(--border)] bg-[var(--background)]">
-          <TabBar />
-          <button
-            onClick={togglePanelSelector}
-            className="p-3 hover:bg-[var(--surface)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
-            title="New panel (Ctrl+T)"
-          >
-            <Plus className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Panel content */}
-        <div className="flex-1 overflow-auto bg-[var(--background)] p-4">
-          {activeTab ? (
-            <PanelContainer tab={activeTab} />
-          ) : (
-            <div className="h-full flex flex-col items-center justify-center text-[var(--text-muted)]">
-              <p className="mb-4">No panels open</p>
-              <button
-                onClick={togglePanelSelector}
-                className="btn btn-primary"
-              >
-                <Plus className="w-4 h-4" />
-                Open a Panel
-              </button>
-            </div>
-          )}
-        </div>
+      {/* Main content — entirely managed by split panel system */}
+      <div className="flex-1 overflow-hidden bg-[var(--background)]">
+        <SplitPanelLayout />
       </div>
 
-      {/* Modals */}
-      {showPanelSelector && <PanelSelector />}
+      {/* Panel selector modal */}
+      {showPanelSelectorForGroup && (
+        <PanelSelector
+          groupId={showPanelSelectorForGroup}
+          onSelect={(panelType) => addTabToGroup(showPanelSelectorForGroup, panelType)}
+          onClose={closePanelSelector}
+        />
+      )}
+
+      {/* Keybindings modal */}
       {showKeybindingsModal && <KeybindingsModal />}
     </div>
+  );
+}
+
+export default function StudioPage() {
+  const { isLoaded, isSignedIn } = useAuth();
+
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      redirect('/');
+    }
+  }, [isLoaded, isSignedIn]);
+
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-72px)]">
+        <div className="animate-pulse text-[var(--text-muted)]">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!isSignedIn) return null;
+
+  return (
+    <SplitPanelProvider>
+      <StudioContent />
+    </SplitPanelProvider>
   );
 }

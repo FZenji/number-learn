@@ -31,10 +31,6 @@ export interface CustomNumber {
 }
 
 interface WorkspaceState {
-  // Tabs
-  tabs: Tab[];
-  activeTabId: string | null;
-  
   // Selected number
   selectedNumberId: string;
   customNumbers: CustomNumber[];
@@ -45,13 +41,6 @@ interface WorkspaceState {
   sidebarCollapsed: boolean;
   
   // Actions
-  addTab: (panelType: PanelType, numberId?: string) => void;
-  closeTab: (tabId: string) => void;
-  setActiveTab: (tabId: string) => void;
-  nextTab: () => void;
-  prevTab: () => void;
-  jumpToTab: (index: number) => void;
-  
   setSelectedNumber: (numberId: string) => void;
   addCustomNumber: (name: string, digits: string) => void;
   removeCustomNumber: (id: string) => void;
@@ -61,23 +50,11 @@ interface WorkspaceState {
   toggleSidebar: () => void;
   
   getSelectedNumber: () => MathConstant | CustomNumber | undefined;
-}
 
-const PANEL_TITLES: Record<PanelType, string> = {
-  'digit-display': 'Digits',
-  'recall-test': 'Recall Test',
-  'practice': 'Practice',
-  'chunk-trainer': 'Chunks',
-  'scratchpad': 'Scratchpad',
-  'notes': 'Notes',
-  'canvas': 'Canvas',
-  'timeline': 'Timeline',
-  'progress': 'Progress',
-  'statistics': 'Statistics',
-  'major-system': 'Major System',
-  'piem': 'Piem',
-  'sequence': 'Sequence',
-};
+  // DB sync
+  syncProgressFromDB: () => Promise<void>;
+  syncCustomNumbersToDB: (action: 'add' | 'remove', data: { externalId: string; name?: string; digits?: string }) => Promise<void>;
+}
 
 function generateId(): string {
   return Math.random().toString(36).substring(2, 9);
@@ -87,92 +64,11 @@ export const useWorkspaceStore = create<WorkspaceState>()(
   persist(
     (set, get) => ({
       // Initial state
-      tabs: [],
-      activeTabId: null,
       selectedNumberId: 'pi',
       customNumbers: [],
       showKeybindingsModal: false,
       showPanelSelector: false,
       sidebarCollapsed: false,
-      
-      // Tab actions
-      addTab: (panelType, numberId) => {
-        const id = generateId();
-        const numId = numberId || get().selectedNumberId;
-        
-        // Find the symbol/name for the tab title
-        let symbol = '?';
-        const builtIn = MATH_CONSTANTS.find(c => c.id === numId);
-        if (builtIn) {
-          symbol = builtIn.symbol;
-        } else {
-          // Check for custom number
-          const customNum = get().customNumbers.find(c => c.id === numId);
-          if (customNum) {
-            symbol = customNum.name;
-          }
-        }
-        
-        const newTab: Tab = {
-          id,
-          title: `${PANEL_TITLES[panelType]} (${symbol})`,
-          panelType,
-          numberId: numId,
-        };
-        
-        set(state => ({
-          tabs: [...state.tabs, newTab],
-          activeTabId: id,
-          showPanelSelector: false,
-        }));
-      },
-      
-      closeTab: (tabId) => {
-        set(state => {
-          const newTabs = state.tabs.filter(t => t.id !== tabId);
-          let newActiveId = state.activeTabId;
-          
-          if (state.activeTabId === tabId) {
-            const closedIndex = state.tabs.findIndex(t => t.id === tabId);
-            if (newTabs.length > 0) {
-              newActiveId = newTabs[Math.min(closedIndex, newTabs.length - 1)].id;
-            } else {
-              newActiveId = null;
-            }
-          }
-          
-          return { tabs: newTabs, activeTabId: newActiveId };
-        });
-      },
-      
-      setActiveTab: (tabId) => {
-        set({ activeTabId: tabId });
-      },
-      
-      nextTab: () => {
-        const { tabs, activeTabId } = get();
-        if (tabs.length === 0) return;
-        
-        const currentIndex = tabs.findIndex(t => t.id === activeTabId);
-        const nextIndex = (currentIndex + 1) % tabs.length;
-        set({ activeTabId: tabs[nextIndex].id });
-      },
-      
-      prevTab: () => {
-        const { tabs, activeTabId } = get();
-        if (tabs.length === 0) return;
-        
-        const currentIndex = tabs.findIndex(t => t.id === activeTabId);
-        const prevIndex = currentIndex <= 0 ? tabs.length - 1 : currentIndex - 1;
-        set({ activeTabId: tabs[prevIndex].id });
-      },
-      
-      jumpToTab: (index) => {
-        const { tabs } = get();
-        if (index >= 0 && index < tabs.length) {
-          set({ activeTabId: tabs[index].id });
-        }
-      },
       
       // Number actions
       setSelectedNumber: (numberId) => {
@@ -181,12 +77,15 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       
       addCustomNumber: (name, digits) => {
         const id = `custom-${generateId()}`;
-        const cleanDigits = digits.replace(/[^0-9.]/g, '');
+        const cleanDigits = digits.replace(/[^0-9.]/g, '').slice(0, 1001);
         
         set(state => ({
           customNumbers: [...state.customNumbers, { id, name, digits: cleanDigits }],
           selectedNumberId: id,
         }));
+
+        // Fire-and-forget DB sync
+        get().syncCustomNumbersToDB('add', { externalId: id, name, digits: cleanDigits }).catch(() => {});
       },
       
       removeCustomNumber: (id) => {
@@ -197,6 +96,8 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             selectedNumberId: state.selectedNumberId === id ? 'pi' : state.selectedNumberId,
           };
         });
+
+        get().syncCustomNumbersToDB('remove', { externalId: id }).catch(() => {});
       },
       
       // UI actions
@@ -218,6 +119,47 @@ export const useWorkspaceStore = create<WorkspaceState>()(
         const builtIn = MATH_CONSTANTS.find(c => c.id === selectedNumberId);
         if (builtIn) return builtIn;
         return customNumbers.find(c => c.id === selectedNumberId);
+      },
+
+      // DB sync actions
+      syncProgressFromDB: async () => {
+        try {
+          const res = await fetch('/api/progress');
+          if (!res.ok) return;
+          const rows = await res.json();
+          // Write each row to localStorage for now (panels read from localStorage)
+          for (const row of rows) {
+            localStorage.setItem(`progress-${row.numberId}`, JSON.stringify({
+              digitsLearned: row.digitsLearned,
+              currentStreak: row.currentStreak,
+              bestStreak: row.bestStreak,
+              bestAccuracy: row.bestAccuracy,
+              lastPracticeDate: row.lastPracticeDate,
+              totalPracticeTime: row.totalPracticeTime,
+            }));
+          }
+        } catch (err) {
+          // Silently fail — localStorage fallback still works
+          console.warn('Failed to sync progress from DB:', err);
+        }
+      },
+
+      syncCustomNumbersToDB: async (action, data) => {
+        try {
+          if (action === 'add') {
+            await fetch('/api/custom-numbers', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data),
+            });
+          } else if (action === 'remove') {
+            await fetch(`/api/custom-numbers?id=${data.externalId}`, {
+              method: 'DELETE',
+            });
+          }
+        } catch (err) {
+          console.warn('Failed to sync custom numbers to DB:', err);
+        }
       },
     }),
     {
