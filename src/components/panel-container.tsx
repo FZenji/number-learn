@@ -13,6 +13,7 @@ import { ProgressPanel } from '@/components/panels/progress-panel';
 import { StatisticsPanel } from '@/components/panels/statistics-panel';
 import { MajorSystemPanel } from '@/components/panels/major-system-panel';
 import { PiemPanel } from '@/components/panels/piem-panel';
+import { AchievementsPanel } from '@/components/panels/achievements-panel';
 import { SequencePanel } from '@/components/panels/sequence-panel';
 
 interface PanelContainerProps {
@@ -34,6 +35,7 @@ export function PanelContainer({ tab }: PanelContainerProps) {
     'major-system': MajorSystemPanel,
     'piem': PiemPanel,
     'sequence': SequencePanel,
+    'achievements': AchievementsPanel,
   };
 
   const PanelComponent = panelComponents[tab.panelType];

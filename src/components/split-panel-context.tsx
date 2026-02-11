@@ -42,6 +42,7 @@ const PANEL_TITLES: Record<PanelType, string> = {
   'major-system': 'Major System',
   'piem': 'Piem',
   'sequence': 'Sequence',
+  'achievements': 'Achievements',
 };
 
 interface SplitPanelContextType {
@@ -245,6 +246,31 @@ export function SplitPanelProvider({ children }: { children: ReactNode }) {
     });
     setActiveGroupId(groupId);
     setShowPanelSelectorForGroup(null);
+
+    // Update streak for this number when a panel is opened
+    try {
+      const storageKey = `progress-${numId}`;
+      const saved = localStorage.getItem(storageKey);
+      const progress = saved ? JSON.parse(saved) : {
+        digitsLearned: 0,
+        currentStreak: 0,
+        bestStreak: 0,
+        totalPracticeTime: 0,
+        lastPracticeDate: null,
+      };
+
+      const today = new Date().toDateString();
+      if (progress.lastPracticeDate !== today) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const wasYesterday = progress.lastPracticeDate === yesterday.toDateString();
+
+        progress.currentStreak = wasYesterday ? progress.currentStreak + 1 : 1;
+        progress.bestStreak = Math.max(progress.bestStreak, progress.currentStreak);
+        progress.lastPracticeDate = today;
+        localStorage.setItem(storageKey, JSON.stringify(progress));
+      }
+    } catch { /* silently fail */ }
   }, []);
 
   const closeTabInGroup = useCallback((groupId: string, tabId: string) => {

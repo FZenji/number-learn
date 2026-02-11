@@ -15,7 +15,8 @@ export type PanelType =
   | 'statistics'
   | 'major-system'
   | 'piem'
-  | 'sequence';
+  | 'sequence'
+  | 'achievements';
 
 export interface Tab {
   id: string;

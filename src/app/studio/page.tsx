@@ -10,6 +10,7 @@ import { PanelSelector } from '@/components/panel-selector';
 import { KeybindingsModal } from '@/components/keybindings-modal';
 import { SplitPanelProvider, useSplitPanel } from '@/components/split-panel-context';
 import { SplitPanelLayout } from '@/components/split-panel-layout';
+import { AchievementToast } from '@/components/achievement-toast';
 import { Menu } from 'lucide-react';
 
 function StudioContent() {
@@ -138,6 +139,7 @@ export default function StudioPage() {
   return (
     <SplitPanelProvider>
       <StudioContent />
+      <AchievementToast />
     </SplitPanelProvider>
   );
 }

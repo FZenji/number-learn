@@ -82,9 +82,9 @@ export default function RootLayout({
                 <Link href="/studio" className="btn btn-primary">
                   Studio
                 </Link>
-                <Link href="/contact" className="btn btn-ghost">
+                <a href="/contact" target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
                   Contact
-                </Link>
+                </a>
                 <UserButton 
                   afterSignOutUrl="/"
                   appearance={{
