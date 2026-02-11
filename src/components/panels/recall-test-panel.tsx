@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useMemo, useRef, useCallback } from 'react';
-import { MATH_CONSTANTS, getDigitsOnly } from '@/data/numbers';
+import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
+import { NUMBER_BANK, getDigitsOnly } from '@/data/numbers';
 import { useWorkspaceStore } from '@/store/workspace-store';
-import { CheckCircle, RotateCcw, Download, PartyPopper } from 'lucide-react';
+import { updateProgress } from '@/utils/progress-utils';
+import { CheckCircle, RotateCcw, Download } from 'lucide-react';
 
 interface RecallTestPanelProps {
   numberId: string;
@@ -28,10 +29,19 @@ export function RecallTestPanel({ numberId }: RecallTestPanelProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const number = useMemo(() => {
-    const builtIn = MATH_CONSTANTS.find(c => c.id === numberId);
+    const builtIn = NUMBER_BANK.find(c => c.id === numberId);
     if (builtIn) return builtIn;
     return customNumbers.find(c => c.id === numberId);
   }, [numberId, customNumbers]);
+
+  // Reset state when number changes
+  useEffect(() => {
+    setPhase('setup');
+    setUserInput('');
+    setResults([]);
+    setIsPerfect(false);
+    setShowCelebration(false);
+  }, [numberId]);
 
   const digits = useMemo(() => {
     if (!number) return '';
@@ -72,19 +82,13 @@ export function RecallTestPanel({ numberId }: RecallTestPanelProps) {
       else break;
     }
 
-    // Update progress
-    const storageKey = `progress-${numberId}`;
-    const saved = localStorage.getItem(storageKey);
-    const progress = saved ? JSON.parse(saved) : {
-      digitsLearned: 0,
-      currentStreak: 0,
-      bestStreak: 0,
-      totalPracticeTime: 0,
-      lastPracticeDate: null,
-    };
+    const accuracyVal = results.length > 0 ? Math.round((correctCount / results.length) * 100) : 0;
 
-    progress.digitsLearned = Math.max(progress.digitsLearned, consecutiveCorrect);
-    localStorage.setItem(storageKey, JSON.stringify(progress));
+    // Update progress using central utility
+    updateProgress(numberId, {
+      digitsLearned: consecutiveCorrect,
+      accuracy: accuracyVal,
+    });
 
     if (allCorrect) {
       localStorage.setItem('perfect-recall-achieved', 'true');
@@ -114,11 +118,15 @@ export function RecallTestPanel({ numberId }: RecallTestPanelProps) {
         <title>Number Learn - Certificate</title>
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@700&display=swap');
+          @page { size: landscape; margin: 1cm; }
           * { margin: 0; padding: 0; box-sizing: border-box; }
+          html, body { width: 100%; height: 100%; }
           body { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #0a0a0a; font-family: 'Inter', sans-serif; }
           .cert {
-            width: 800px; padding: 60px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            border: 2px solid #f59e0b; border-radius: 24px; text-align: center; color: #f8fafc; position: relative; overflow: hidden;
+            width: 100%; max-width: 900px; padding: 60px; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border: 4px solid #f59e0b; border-radius: 32px; text-align: center; color: #f8fafc; position: relative; overflow: hidden;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            break-inside: avoid; page-break-inside: avoid;
           }
           .cert::before {
             content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
@@ -127,14 +135,18 @@ export function RecallTestPanel({ numberId }: RecallTestPanelProps) {
           }
           @keyframes spin { to { transform: rotate(360deg); } }
           .cert-content { position: relative; z-index: 1; }
-          .trophy { font-size: 64px; margin-bottom: 16px; }
-          h1 { font-family: 'Playfair Display', serif; font-size: 36px; color: #f59e0b; margin-bottom: 8px; }
-          .subtitle { color: #94a3b8; font-size: 14px; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 32px; }
-          .achievement { font-size: 48px; font-weight: 700; color: #f8fafc; margin-bottom: 8px; }
-          .number-name { font-size: 20px; color: #f59e0b; margin-bottom: 32px; }
-          .divider { width: 200px; height: 2px; background: linear-gradient(90deg, transparent, #f59e0b, transparent); margin: 24px auto; }
-          .date { color: #64748b; font-size: 14px; }
-          .footer { margin-top: 32px; color: #475569; font-size: 12px; }
+          .trophy { font-size: 64px; margin-bottom: 20px; }
+          h1 { font-family: 'Playfair Display', serif; font-size: 36px; color: #f59e0b; margin-bottom: 10px; }
+          .subtitle { color: #94a3b8; font-size: 14px; text-transform: uppercase; letter-spacing: 4px; margin-bottom: 30px; }
+          .achievement { font-size: 60px; font-weight: 700; color: #f8fafc; margin-bottom: 10px; }
+          .number-name { font-size: 24px; color: #f59e0b; margin-bottom: 30px; }
+          .divider { width: 300px; height: 3px; background: linear-gradient(90deg, transparent, #f59e0b, transparent); margin: 24px auto; }
+          .date { color: #64748b; font-size: 16px; }
+          .footer { margin-top: 30px; color: #475569; font-size: 14px; }
+          @media print { 
+            body { background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; } 
+            .cert { border-width: 8px; box-shadow: none; }
+          }
         </style>
       </head>
       <body>

@@ -1,12 +1,13 @@
 'use client';
 
 import { useWorkspaceStore } from '@/store/workspace-store';
-import { MATH_CONSTANTS, getDigitsOnly } from '@/data/numbers';
-import { Plus, Trash2, Upload, Flame, TrendingUp } from 'lucide-react';
+import { NUMBER_BANK, getDigitsOnly } from '@/data/numbers';
+import { Plus, Trash2, Upload, Flame, TrendingUp, Library, X, Check } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 
 interface NumberSelectorProps {
   collapsed?: boolean;
+  hidePreview?: boolean;
 }
 
 const MAX_DIGITS = 1001;
@@ -16,27 +17,36 @@ interface NumberProgress {
   currentStreak: number;
 }
 
-export function NumberSelector({ collapsed = false }: NumberSelectorProps) {
+export function NumberSelector({ collapsed = false, hidePreview = false }: NumberSelectorProps) {
   const { 
     selectedNumberId, 
     setSelectedNumber, 
     customNumbers,
     addCustomNumber,
     removeCustomNumber,
+    sidebarNumberIds,
+    addToSidebar,
+    removeFromSidebar,
   } = useWorkspaceStore();
   
   const [showCustomInput, setShowCustomInput] = useState(false);
+  const [showNumberBank, setShowNumberBank] = useState(false);
   const [customName, setCustomName] = useState('');
   const [customDigits, setCustomDigits] = useState('');
   const [progressMap, setProgressMap] = useState<Record<string, NumberProgress>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Get the sidebar built-in constants in display order
+  const sidebarConstants = sidebarNumberIds
+    .map(id => NUMBER_BANK.find(c => c.id === id))
+    .filter(Boolean) as typeof NUMBER_BANK;
 
   // Load progress from localStorage for all numbers
   useEffect(() => {
     const loadProgress = () => {
       const map: Record<string, NumberProgress> = {};
       const allIds = [
-        ...MATH_CONSTANTS.map(c => c.id),
+        ...NUMBER_BANK.map(c => c.id),
         ...customNumbers.map(c => c.id),
       ];
       allIds.forEach(id => {
@@ -60,7 +70,6 @@ export function NumberSelector({ collapsed = false }: NumberSelectorProps) {
 
   const handleAddCustom = () => {
     if (customName.trim() && customDigits.trim()) {
-      // Enforce 1001 digit limit
       const clampedDigits = customDigits.trim().slice(0, MAX_DIGITS);
       addCustomNumber(customName.trim(), clampedDigits);
       setCustomName('');
@@ -96,7 +105,6 @@ export function NumberSelector({ collapsed = false }: NumberSelectorProps) {
           digits = content.replace(/[^0-9.]/g, '');
         }
 
-        // Enforce 1001 digit limit
         digits = digits.slice(0, MAX_DIGITS);
 
         if (digits.length < 2) {
@@ -138,8 +146,8 @@ export function NumberSelector({ collapsed = false }: NumberSelectorProps) {
 
   return (
     <div className="py-2">
-      {/* Built-in constants */}
-      {MATH_CONSTANTS.map((constant) => {
+      {/* Built-in constants from sidebar */}
+      {sidebarConstants.map((constant) => {
         const totalDigits = getDigitsOnly(constant).length;
         return (
           <button
@@ -152,14 +160,16 @@ export function NumberSelector({ collapsed = false }: NumberSelectorProps) {
             `}
             title={constant.name}
           >
-            <span className="text-2xl font-mono text-[var(--primary)] w-8 text-center">
+            <span className={`font-mono text-[var(--primary)] w-12 text-center shrink-0 ${
+              constant.symbol.length > 2 ? 'text-lg' : 'text-2xl'
+            }`}>
               {constant.symbol}
             </span>
             {!collapsed && (
               <div className="flex-1 text-left overflow-hidden">
                 <div className="text-sm font-medium truncate">{constant.name}</div>
                 <div className="text-xs text-[var(--text-muted)] font-mono truncate">
-                  {constant.digits.slice(0, 10)}...
+                  {hidePreview ? '●●●●●●●●●●...' : `${constant.digits.slice(0, 10)}...`}
                 </div>
                 {renderStats(constant.id, totalDigits)}
               </div>
@@ -167,6 +177,17 @@ export function NumberSelector({ collapsed = false }: NumberSelectorProps) {
           </button>
         );
       })}
+
+      {/* Browse Number Bank button */}
+      {!collapsed && (
+        <button
+          onClick={() => setShowNumberBank(true)}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 text-[var(--text-muted)] hover:text-[var(--primary)] hover:bg-[var(--surface-hover)] transition-colors text-sm"
+        >
+          <Library className="w-4 h-4" />
+          Browse Number Bank
+        </button>
+      )}
 
       {/* Divider */}
       <div className="mx-3 my-2 border-t border-[var(--border)]" />
@@ -185,14 +206,14 @@ export function NumberSelector({ collapsed = false }: NumberSelectorProps) {
             onClick={() => setSelectedNumber(num.id)}
             className="flex-1 flex items-center gap-3 text-left overflow-hidden"
           >
-            <span className="text-xl font-mono text-[var(--text-secondary)] w-8 text-center">
+            <span className="text-xl font-mono text-[var(--text-secondary)] w-12 text-center shrink-0">
               #
             </span>
             {!collapsed && (
               <div className="flex-1 overflow-hidden">
                 <div className="text-sm font-medium truncate">{num.name}</div>
                 <div className="text-xs text-[var(--text-muted)] font-mono truncate">
-                  {num.digits.slice(0, 10)}...
+                  {hidePreview ? '●●●●●●●●●●...' : `${num.digits.slice(0, 10)}...`}
                 </div>
                 {renderStats(num.id, num.digits.replace(/[^0-9]/g, '').length)}
               </div>
@@ -277,6 +298,102 @@ export function NumberSelector({ collapsed = false }: NumberSelectorProps) {
           <p className="text-xs text-[var(--text-muted)] text-center mt-2">
             .txt, .csv, or .json (max {MAX_DIGITS} digits)
           </p>
+        </div>
+      )}
+
+      {/* Number Bank Modal */}
+      {showNumberBank && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          onClick={() => setShowNumberBank(false)}
+        >
+          {/* Backdrop */}
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          
+          {/* Modal */}
+          <div
+            className="relative bg-[var(--surface)] border border-[var(--border)] rounded-xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden animate-fade-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border)]">
+              <div>
+                <h2 className="text-lg font-semibold">Number Bank</h2>
+                <p className="text-xs text-[var(--text-muted)]">Toggle constants to show in your sidebar</p>
+              </div>
+              <button
+                onClick={() => setShowNumberBank(false)}
+                className="p-1.5 rounded-lg hover:bg-[var(--surface-hover)] text-[var(--text-muted)] transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Constant list */}
+            <div className="flex-1 overflow-y-auto p-3 space-y-1">
+              {NUMBER_BANK.map((constant) => {
+                const isInSidebar = sidebarNumberIds.includes(constant.id);
+                const totalDigits = getDigitsOnly(constant).length;
+                return (
+                  <div
+                    key={constant.id}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors cursor-pointer ${
+                      isInSidebar
+                        ? 'bg-[var(--primary)]/10 border border-[var(--primary)]/30'
+                        : 'hover:bg-[var(--surface-hover)] border border-transparent'
+                    }`}
+                    onClick={() => {
+                      if (isInSidebar) {
+                        removeFromSidebar(constant.id);
+                      } else {
+                        addToSidebar(constant.id);
+                      }
+                    }}
+                  >
+                    {/* Symbol */}
+                    <span className={`font-mono text-[var(--primary)] w-12 text-center shrink-0 ${
+                      constant.symbol.length > 2 ? 'text-base' : 'text-2xl'
+                    }`}>
+                      {constant.symbol}
+                    </span>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium truncate">{constant.name}</div>
+                      <div className="text-xs text-[var(--text-muted)] truncate">
+                        {constant.description}
+                      </div>
+                      <div className="text-[10px] text-[var(--text-muted)] font-mono mt-0.5">
+                        {totalDigits} digits available
+                      </div>
+                    </div>
+
+                    {/* Toggle indicator */}
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-colors ${
+                      isInSidebar
+                        ? 'bg-[var(--primary)] text-white'
+                        : 'border-2 border-[var(--border)]'
+                    }`}>
+                      {isInSidebar && <Check className="w-3.5 h-3.5" />}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Footer */}
+            <div className="px-5 py-3 border-t border-[var(--border)] flex items-center justify-between">
+              <span className="text-xs text-[var(--text-muted)]">
+                {sidebarNumberIds.length} of {NUMBER_BANK.length} constants in sidebar
+              </span>
+              <button
+                onClick={() => setShowNumberBank(false)}
+                className="btn btn-primary text-sm px-4 py-1.5"
+              >
+                Done
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

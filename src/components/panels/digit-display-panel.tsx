@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { MATH_CONSTANTS, chunkDigits, getDigitsOnly } from '@/data/numbers';
+import { NUMBER_BANK, chunkDigits, getDigitsOnly } from '@/data/numbers';
 import { useWorkspaceStore } from '@/store/workspace-store';
 import { Copy, Check, Settings } from 'lucide-react';
 
@@ -17,7 +17,7 @@ export function DigitDisplayPanel({ numberId }: DigitDisplayPanelProps) {
   const [highlightPosition, setHighlightPosition] = useState<number | null>(null);
 
   const number = useMemo(() => {
-    const builtIn = MATH_CONSTANTS.find(c => c.id === numberId);
+    const builtIn = NUMBER_BANK.find(c => c.id === numberId);
     if (builtIn) return builtIn;
     return customNumbers.find(c => c.id === numberId);
   }, [numberId, customNumbers]);

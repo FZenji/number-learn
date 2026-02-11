@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
-import { MATH_CONSTANTS, getDigitsOnly } from '@/data/numbers';
+import { NUMBER_BANK, getDigitsOnly } from '@/data/numbers';
 import { useWorkspaceStore } from '@/store/workspace-store';
 import { Play, Pause, SkipForward, SkipBack, Settings, Volume2, VolumeX } from 'lucide-react';
 
@@ -58,7 +58,7 @@ export function SequencePanel({ numberId }: SequencePanelProps) {
   const playIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const number = useMemo(() => {
-    const builtIn = MATH_CONSTANTS.find(c => c.id === numberId);
+    const builtIn = NUMBER_BANK.find(c => c.id === numberId);
     if (builtIn) return builtIn;
     return customNumbers.find(c => c.id === numberId);
   }, [numberId, customNumbers]);

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { MATH_CONSTANTS, getDigitsOnly } from '@/data/numbers';
+import { NUMBER_BANK, getDigitsOnly } from '@/data/numbers';
 import { useWorkspaceStore } from '@/store/workspace-store';
 import { TrendingUp, Edit2, Check, Flame, Target } from 'lucide-react';
 
@@ -34,7 +34,7 @@ export function ProgressPanel({ numberId }: ProgressPanelProps) {
   const [targetInput, setTargetInput] = useState('');
 
   const number = useMemo(() => {
-    const builtIn = MATH_CONSTANTS.find(c => c.id === numberId);
+    const builtIn = NUMBER_BANK.find(c => c.id === numberId);
     if (builtIn) return builtIn;
     return customNumbers.find(c => c.id === numberId);
   }, [numberId, customNumbers]);

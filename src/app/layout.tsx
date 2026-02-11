@@ -63,7 +63,7 @@ export default function RootLayout({
     <ClerkProvider appearance={{ baseTheme: dark }}>
       <html lang="en">
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`${geistSans.className} ${geistSans.variable} ${geistMono.variable} antialiased`}
         >
           <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-[var(--surface)] border-b border-[var(--border)]">
             <a href="/" className="text-lg font-semibold tracking-tight">

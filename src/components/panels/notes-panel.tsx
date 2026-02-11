@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { MATH_CONSTANTS } from '@/data/numbers';
+import { NUMBER_BANK } from '@/data/numbers';
 import { useWorkspaceStore } from '@/store/workspace-store';
 import { Save, Trash2, FileText } from 'lucide-react';
 
@@ -15,7 +15,7 @@ export function NotesPanel({ numberId }: NotesPanelProps) {
   const [saved, setSaved] = useState(false);
 
   const number = useMemo(() => {
-    const builtIn = MATH_CONSTANTS.find(c => c.id === numberId);
+    const builtIn = NUMBER_BANK.find(c => c.id === numberId);
     if (builtIn) return builtIn;
     return customNumbers.find(c => c.id === numberId);
   }, [numberId, customNumbers]);

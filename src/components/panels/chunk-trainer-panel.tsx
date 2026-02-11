@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { MATH_CONSTANTS, getDigitsOnly, chunkDigits } from '@/data/numbers';
+import { NUMBER_BANK, getDigitsOnly, chunkDigits } from '@/data/numbers';
 import { useWorkspaceStore } from '@/store/workspace-store';
 import { Eye, EyeOff, ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
 
@@ -17,7 +17,7 @@ export function ChunkTrainerPanel({ numberId }: ChunkTrainerPanelProps) {
   const [masteredChunks, setMasteredChunks] = useState<Set<number>>(new Set());
 
   const number = useMemo(() => {
-    const builtIn = MATH_CONSTANTS.find(c => c.id === numberId);
+    const builtIn = NUMBER_BANK.find(c => c.id === numberId);
     if (builtIn) return builtIn;
     return customNumbers.find(c => c.id === numberId);
   }, [numberId, customNumbers]);

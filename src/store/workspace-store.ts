@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { MATH_CONSTANTS, type MathConstant } from '@/data/numbers';
+import { NUMBER_BANK, DEFAULT_SIDEBAR_IDS, type MathConstant } from '@/data/numbers';
 
 export type PanelType = 
   | 'digit-display'
@@ -35,6 +35,7 @@ interface WorkspaceState {
   // Selected number
   selectedNumberId: string;
   customNumbers: CustomNumber[];
+  sidebarNumberIds: string[];
   
   // UI state
   showKeybindingsModal: boolean;
@@ -45,6 +46,8 @@ interface WorkspaceState {
   setSelectedNumber: (numberId: string) => void;
   addCustomNumber: (name: string, digits: string) => void;
   removeCustomNumber: (id: string) => void;
+  addToSidebar: (id: string) => void;
+  removeFromSidebar: (id: string) => void;
   
   toggleKeybindingsModal: () => void;
   togglePanelSelector: () => void;
@@ -67,6 +70,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       // Initial state
       selectedNumberId: 'pi',
       customNumbers: [],
+      sidebarNumberIds: [...DEFAULT_SIDEBAR_IDS],
       showKeybindingsModal: false,
       showPanelSelector: false,
       sidebarCollapsed: false,
@@ -95,10 +99,26 @@ export const useWorkspaceStore = create<WorkspaceState>()(
           return {
             customNumbers: newCustom,
             selectedNumberId: state.selectedNumberId === id ? 'pi' : state.selectedNumberId,
+            sidebarNumberIds: state.sidebarNumberIds.filter(sid => sid !== id),
           };
         });
 
         get().syncCustomNumbersToDB('remove', { externalId: id }).catch(() => {});
+      },
+
+      addToSidebar: (id) => {
+        set(state => ({
+          sidebarNumberIds: state.sidebarNumberIds.includes(id)
+            ? state.sidebarNumberIds
+            : [...state.sidebarNumberIds, id],
+        }));
+      },
+
+      removeFromSidebar: (id) => {
+        set(state => ({
+          sidebarNumberIds: state.sidebarNumberIds.filter(sid => sid !== id),
+          selectedNumberId: state.selectedNumberId === id ? (state.sidebarNumberIds[0] || 'pi') : state.selectedNumberId,
+        }));
       },
       
       // UI actions
@@ -117,7 +137,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
       // Getters
       getSelectedNumber: () => {
         const { selectedNumberId, customNumbers } = get();
-        const builtIn = MATH_CONSTANTS.find(c => c.id === selectedNumberId);
+        const builtIn = NUMBER_BANK.find(c => c.id === selectedNumberId);
         if (builtIn) return builtIn;
         return customNumbers.find(c => c.id === selectedNumberId);
       },
@@ -169,6 +189,7 @@ export const useWorkspaceStore = create<WorkspaceState>()(
         selectedNumberId: state.selectedNumberId,
         customNumbers: state.customNumbers,
         sidebarCollapsed: state.sidebarCollapsed,
+        sidebarNumberIds: state.sidebarNumberIds,
       }),
     }
   )

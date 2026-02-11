@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { MATH_CONSTANTS } from '@/data/numbers';
+import { NUMBER_BANK } from '@/data/numbers';
 import { useWorkspaceStore } from '@/store/workspace-store';
 import { BarChart3, Clock, Target, Zap } from 'lucide-react';
 
@@ -38,7 +38,7 @@ export function StatisticsPanel({ numberId }: StatisticsPanelProps) {
   });
 
   const number = useMemo(() => {
-    const builtIn = MATH_CONSTANTS.find(c => c.id === numberId);
+    const builtIn = NUMBER_BANK.find(c => c.id === numberId);
     if (builtIn) return builtIn;
     return customNumbers.find(c => c.id === numberId);
   }, [numberId, customNumbers]);
@@ -87,7 +87,7 @@ export function StatisticsPanel({ numberId }: StatisticsPanelProps) {
             Start practicing to see your statistics here. Use the Practice panel to begin your learning journey.
           </p>
           <div className="text-sm text-[var(--text-muted)]">
-            Press <span className="kbd mx-1">Ctrl</span> + <span className="kbd mx-1">T</span> then select <strong>Practice</strong>
+            Press <span className="kbd mx-1">T</span> then select <strong>Practice</strong> to begin
           </div>
         </div>
       ) : (

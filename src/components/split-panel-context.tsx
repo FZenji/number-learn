@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import type { PanelType } from '@/store/workspace-store';
-import { MATH_CONSTANTS } from '@/data/numbers';
+import { NUMBER_BANK } from '@/data/numbers';
 import { useWorkspaceStore } from '@/store/workspace-store';
 
 // A tab within an editor group
@@ -89,7 +89,7 @@ function genId(prefix: string) {
 
 function getTabTitle(panelType: PanelType, numberId: string, customNumbers: { id: string; name: string }[]): string {
   let symbol = '?';
-  const builtIn = MATH_CONSTANTS.find(c => c.id === numberId);
+  const builtIn = NUMBER_BANK.find(c => c.id === numberId);
   if (builtIn) {
     symbol = builtIn.symbol;
   } else {

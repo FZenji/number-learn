@@ -29,6 +29,7 @@ function StudioContent() {
     addTabToGroup,
     openPanelSelectorForGroup,
     initialize,
+    groups,
   } = useSplitPanel();
 
   // Initialize the first editor group on mount
@@ -56,6 +57,13 @@ function StudioContent() {
     return () => unregisterPanelSelectorAction();
   }, [activeGroupId, openPanelSelectorForGroup]);
 
+  // Check if any active tab is a recall test to hide digit previews
+  const hidePreview = Object.values(groups).some(group => {
+    if (!group.activeTabId) return false;
+    const activeTab = group.tabs.find(t => t.id === group.activeTabId);
+    return activeTab?.panelType === 'recall-test';
+  });
+
   return (
     <div className="flex h-[calc(100vh-72px)]">
       {/* Sidebar */}
@@ -80,7 +88,7 @@ function StudioContent() {
             </button>
           </div>
           <div className="flex-1 overflow-y-auto">
-            <NumberSelector collapsed={sidebarCollapsed} />
+            <NumberSelector collapsed={sidebarCollapsed} hidePreview={hidePreview} />
           </div>
           <div className="p-3 border-t border-[var(--border)]">
             <button

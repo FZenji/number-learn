@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { MATH_CONSTANTS } from '@/data/numbers';
+import { NUMBER_BANK } from '@/data/numbers';
 import { useWorkspaceStore } from '@/store/workspace-store';
 import { Trophy, Flame, Target, Star, Eye, Brain, Zap, Award, Crown, Sparkles } from 'lucide-react';
 
@@ -121,7 +121,7 @@ function getAchievementContext(): AchievementContext {
   const allProgress: Record<string, ProgressData> = {};
   
   // Gather progress for all numbers
-  const allIds = [...MATH_CONSTANTS.map(c => c.id)];
+  const allIds = [...NUMBER_BANK.map(c => c.id)];
   // Also check for custom numbers
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
