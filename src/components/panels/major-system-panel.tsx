@@ -130,7 +130,7 @@ export function MajorSystemPanel({ numberId }: MajorSystemPanelProps) {
                 </div>
                 
                 {/* Digits */}
-                <div className="text-3xl font-mono tracking-widest mb-4 text-[var(--primary)]">
+                <div className="text-3xl font-mono tracking-wider mb-4 text-[var(--primary)]">
                   {groupDigits.split('').map((d, i) => (
                     <span key={i} className={i > 0 && i % 2 === 0 ? 'ml-4' : ''}>
                       {d}

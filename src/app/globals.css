@@ -39,6 +39,12 @@
   --font-mono: var(--font-geist-mono);
 }
 
+@layer base {
+  .font-mono {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
@@ -189,9 +195,15 @@ body {
 
 /* Digit display */
 .digit {
-  font-family: var(--font-mono), 'Courier New', monospace;
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 18px;
-  letter-spacing: 2px;
+  display: inline-block;
+  width: 1ch;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  -moz-font-feature-settings: "tnum";
+  -webkit-font-feature-settings: "tnum";
+  font-feature-settings: "tnum";
 }
 
 .digit-correct {

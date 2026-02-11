@@ -175,7 +175,7 @@ export function ChunkTrainerPanel({ numberId }: ChunkTrainerPanelProps) {
           
           <div className="text-center min-h-[80px] flex items-center justify-center">
             {showChunk ? (
-              <span className="text-5xl md:text-6xl font-mono tracking-widest text-[var(--primary)]">
+              <span className="text-5xl md:text-6xl font-mono tracking-wider text-[var(--primary)]">
                 {currentChunk}
               </span>
             ) : (

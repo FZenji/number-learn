@@ -135,7 +135,7 @@ export function PiemPanel({ numberId }: PiemPanelProps) {
       {/* Target digits display */}
       <div className="mb-6">
         <label className="text-sm text-[var(--text-muted)] block mb-2">Target digits to encode:</label>
-        <div className="p-4 bg-[var(--surface)] rounded-lg border border-[var(--border)] font-mono text-2xl tracking-widest">
+        <div className="p-4 bg-[var(--surface)] rounded-lg border border-[var(--border)] font-mono text-2xl tracking-wider">
           {targetDigitStr.split('').map((d, i) => (
             <span 
               key={i} 
@@ -182,7 +182,7 @@ export function PiemPanel({ numberId }: PiemPanelProps) {
               {userDigits.length}/{targetDigits} digits
             </span>
           </div>
-          <div className="font-mono text-lg tracking-widest">
+          <div className="font-mono text-lg tracking-wider">
             {userDigits.split('').map((d, i) => (
               <span 
                 key={i}

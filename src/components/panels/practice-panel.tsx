@@ -334,20 +334,20 @@ export function PracticePanel({ numberId }: PracticePanelProps) {
             type="text"
             value={userInput}
             onChange={handleInput}
-            className="input font-mono text-2xl tracking-widest py-6 mb-4"
+            className="input font-mono text-2xl tracking-wider py-6 mb-4"
             placeholder={isActive ? "Type..." : "Press Start or type to begin"}
             autoFocus
             disabled={isCompleted}
           />
         ) : (
-           <div className="input font-mono text-2xl tracking-widest py-6 mb-4 bg-[var(--surface-hover)] opacity-50 cursor-not-allowed">
+           <div className="input font-mono text-2xl tracking-wider py-6 mb-4 bg-[var(--surface-hover)] opacity-50 cursor-not-allowed">
              {userInput}
            </div>
         )}
         
         {/* Visual feedback for input */}
         <div className="flex-1 overflow-auto p-4 bg-[var(--surface)] rounded-lg border border-[var(--border)]">
-          <div className="font-mono text-xl leading-loose tracking-widest break-words">
+          <div className="font-mono text-xl leading-loose tracking-wider break-words">
              {/* Show typed digits */}
             {userInput.split('').map((digit, i) => (
               <span key={i} className="text-[var(--success)]">{digit}</span>

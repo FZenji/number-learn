@@ -95,8 +95,8 @@ export function DigitDisplayPanel({ numberId }: DigitDisplayPanelProps) {
       <div className="flex-1 overflow-auto bg-[var(--surface)] rounded-lg border border-[var(--border)] p-4">
         <div className="flex flex-wrap gap-x-4 gap-y-2">
           {chunks.map((chunk, chunkIndex) => (
-            <div key={chunkIndex} className="flex items-center gap-1">
-              <span className="text-xs text-[var(--text-muted)] w-8 text-right mr-2">
+            <div key={chunkIndex} className="flex items-center">
+              <span className="text-[10px] font-mono text-[var(--text-muted)] w-10 text-right mr-3 shrink-0">
                 {chunkIndex * chunkSize + 1}
               </span>
               <div className="flex">
@@ -106,7 +106,7 @@ export function DigitDisplayPanel({ numberId }: DigitDisplayPanelProps) {
                     <span
                       key={digitIndex}
                       className={`
-                        digit cursor-pointer px-1 rounded transition-colors
+                        digit cursor-pointer rounded transition-colors
                         ${highlightPosition === position 
                           ? 'digit-current' 
                           : 'hover:bg-[var(--surface-hover)]'

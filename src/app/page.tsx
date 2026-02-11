@@ -6,7 +6,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative px-6 py-24 md:py-32 overflow-hidden">
+      <section id="hero" className="relative px-6 py-24 md:py-32 overflow-hidden">
         {/* Background gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary)]/10 via-transparent to-transparent pointer-events-none" />
         
@@ -103,7 +103,7 @@ export default function HomePage() {
       </section>
 
       {/* Numbers Preview */}
-      <section className="px-6 py-20">
+      <section id="constants" className="px-6 py-20">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-12">
             Start With These Constants
@@ -121,7 +121,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="px-6 py-20 bg-gradient-to-b from-[var(--surface)] to-[var(--background)]">
+      <section id="cta" className="px-6 py-20 bg-gradient-to-b from-[var(--surface)] to-[var(--background)]">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
             Ready to Expand Your Memory?
