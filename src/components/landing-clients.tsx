@@ -358,6 +358,22 @@ export function ExpandableBentoCard({
                     </div>
                   )}
                 </div>
+                <div className="bento-modal-footer p-6 lg:padding-x-12 border-t border-[var(--border)] flex justify-end gap-4">
+                  <SignedOut>
+                    <SignUpButton mode="modal">
+                      <button className="landing-btn-google">
+                        <GoogleIcon />
+                        Sign up with Google
+                      </button>
+                    </SignUpButton>
+                    <SignUpButton mode="modal">
+                      <button className="landing-btn-primary">
+                        Get started
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </SignUpButton>
+                  </SignedOut>
+                </div>
               </div>
             </div>,
             document.body
@@ -806,6 +822,12 @@ export function FAQSection() {
 
 export function BentoBackground({ isHovered = false }: { isHovered?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const timeRef = useRef(0);
+  const hoverRef = useRef(isHovered);
+
+  useEffect(() => {
+    hoverRef.current = isHovered;
+  }, [isHovered]);
   
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -813,20 +835,20 @@ export function BentoBackground({ isHovered = false }: { isHovered?: boolean }) 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     let raf: number;
-    let time = 0;
 
     const render = () => {
       const w = canvas.width = canvas.offsetWidth;
       const h = canvas.height = canvas.offsetHeight;
-      time += isHovered ? 0.005 : 0.001;
+      timeRef.current += hoverRef.current ? 0.005 : 0.001;
+      const t = timeRef.current;
       
       ctx.clearRect(0, 0, w, h);
       ctx.fillStyle = "rgba(99, 102, 241, 0.05)";
       
       for (let i = 0; i < 40; i++) {
-        const x = (Math.sin(time + i * 0.2) * 0.5 + 0.5) * w;
-        const y = (Math.cos(time * 0.8 + i * 0.3) * 0.5 + 0.5) * h;
-        const r = Math.sin(time * 2 + i) * 10 + 15;
+        const x = (Math.sin(t + i * 0.2) * 0.5 + 0.5) * w;
+        const y = (Math.cos(t * 0.8 + i * 0.3) * 0.5 + 0.5) * h;
+        const r = Math.sin(t * 2 + i) * 10 + 15;
         
         ctx.beginPath();
         ctx.arc(x, y, Math.max(0.1, r), 0, Math.PI * 2);
@@ -836,7 +858,7 @@ export function BentoBackground({ isHovered = false }: { isHovered?: boolean }) 
     };
     render();
     return () => cancelAnimationFrame(raf);
-  }, [isHovered]);
+  }, []);
 
   return (
     <canvas 

@@ -445,18 +445,18 @@ body {
   overflow: hidden;
 }
 
-.landing-step-number {
-  position: absolute;
-  top: -20px;
-  left: -10px;
-  font-size: 8rem;
+/* .landing-step-number { */
+  /* position: absolute; */
+  /* top: -20px; */
+  /* left: -10px; */
+  /* font-size: 8rem;
   font-weight: 800;
   color: var(--primary);
   opacity: 0.8;
   z-index: 0;
   line-height: 1;
-  pointer-events: none;
-}
+  pointer-events: none; */
+/* } */
 
 .floating-particles-canvas {
   position: absolute;
@@ -598,7 +598,6 @@ body {
 .metrics-strip {
   position: relative;
   overflow: hidden;
-  border-bottom: 1px solid var(--border);
 }
 
 .metrics-glow {
@@ -693,6 +692,8 @@ body {
   padding-bottom: 8px;
   padding-top: 12px;
   margin-top: -12px;
+  /* Prevent scrolling past container bounds */
+  max-width: 100%;
 }
 
 .carousel-track::-webkit-scrollbar {
@@ -842,8 +843,8 @@ body {
 .bento-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.85); /* Darker overlay */
-  backdrop-filter: blur(12px); /* Heavier blur */
+  background: rgba(0,0,0,0.1); /* Light, mostly transparent */
+  backdrop-filter: blur(8px); /* Subtle blur */
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -1135,10 +1136,10 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  opacity: 0.3;
+  opacity: 0.8;
   line-height: 1;
-  margin-bottom: 20px;
   letter-spacing: -0.04em;
+  margin-left: -0.05em;
 }
 
 /* --- Split sections (asymmetric text/image) --- */
@@ -1395,7 +1396,7 @@ body {
 
 .particle-grid-wrap {
   width: 100%;
-  height: 320px;
+  height: 100%;
   position: relative;
 }
 

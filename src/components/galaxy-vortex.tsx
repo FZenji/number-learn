@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useMemo } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { useRef, useMemo, useEffect } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
+import { PerspectiveCamera } from "@react-three/drei";
 
 const COUNT = 12000;
 const RADIUS = 35;
@@ -19,6 +20,8 @@ function SwirlingGalaxy() {
     const colors = new Float32Array(COUNT * 3);
     const sizes = new Float32Array(COUNT);
     const phases = new Float32Array(COUNT);
+    const radii = new Float32Array(COUNT);
+    const angles = new Float32Array(COUNT);
 
     const c1 = new THREE.Color("#8b5cf6"); // Purple
     const c2 = new THREE.Color("#06b6d4"); // Cyan
@@ -75,31 +78,62 @@ function SwirlingGalaxy() {
       // 5. Size and Phase
       sizes[i] = (Math.random() * 0.2 + 0.05) * (1 - distRatio * 0.5);
       phases[i] = Math.random() * Math.PI * 2;
+      radii[i] = r;
+      angles[i] = angle;
     }
 
     geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
     geo.setAttribute("size", new THREE.BufferAttribute(sizes, 1));
     geo.setAttribute("phase", new THREE.BufferAttribute(phases, 1));
+    geo.setAttribute("radius", new THREE.BufferAttribute(radii, 1));
+    geo.setAttribute("baseAngle", new THREE.BufferAttribute(angles, 1));
     return geo;
+  }, []);
+
+  const circleTexture = useMemo(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 32;
+    canvas.height = 32;
+    const ctx = canvas.getContext("2d");
+    if (ctx) {
+      ctx.beginPath();
+      ctx.arc(16, 16, 16, 0, 2 * Math.PI);
+      ctx.fillStyle = "white";
+      ctx.fill();
+    }
+    return new THREE.CanvasTexture(canvas);
   }, []);
 
   useFrame((state) => {
     if (!ref.current) return;
     const t = state.clock.elapsedTime;
     
-    // Rotate the entire galaxy slowly
-    ref.current.rotation.y = t * 0.1;
-    // Add a gentle wobble to the disc
+    // Set a gentle wobble to the disc
     ref.current.rotation.z = Math.sin(t * 0.2) * 0.1;
     ref.current.rotation.x = 0.2 + Math.cos(t * 0.15) * 0.05;
 
-    // Optional: make stars twinkle in material (needs custom shader to do cheaply, skipping for simple implementation)
+    // Custom radial rotation: outer faster, inner slower
+    const positions = ref.current.geometry.attributes.position.array as Float32Array;
+    const baseAngles = ref.current.geometry.attributes.baseAngle.array as Float32Array;
+    const radii = ref.current.geometry.attributes.radius.array as Float32Array;
+
+    for (let i = 0; i < COUNT; i++) {
+        const r = radii[i];
+        // Outer rotates quicker, center slower
+        const speed = 0.05 + Math.pow(r / RADIUS, 1.2) * 0.6;
+        const currentAngle = baseAngles[i] + t * speed;
+        
+        positions[i * 3] = Math.cos(currentAngle) * r;
+        positions[i * 3 + 2] = Math.sin(currentAngle) * r;
+    }
+    ref.current.geometry.attributes.position.needsUpdate = true;
   });
 
   return (
     <points ref={ref} geometry={particles}>
       <pointsMaterial
+        map={circleTexture}
         size={0.15}
         vertexColors
         transparent
@@ -112,15 +146,32 @@ function SwirlingGalaxy() {
   );
 }
 
+function TrailEffect() {
+  const { gl } = useThree();
+  useEffect(() => {
+    gl.autoClearColor = false;
+    return () => { gl.autoClearColor = true; };
+  }, [gl]);
+
+  return (
+    <mesh position={[0, 0, -2]} renderOrder={-1}>
+      <planeGeometry args={[100, 100]} />
+      <meshBasicMaterial color="#000000" transparent opacity={0.15} depthTest={false} depthWrite={false} />
+    </mesh>
+  );
+}
+
 export default function GalaxyVortex() {
   return (
-    <div className="galaxy-vortex-wrap" style={{ width: "100%", height: "100%" }}>
+    <div className="galaxy-vortex-wrap" style={{ width: "100%", height: "100%", background: "#0b0b0f" }}>
       <Canvas
-        camera={{ position: [0, 10, 25], fov: 60 }}
         dpr={[1, 1.5]}
-        gl={{ antialias: true, alpha: true }}
+        gl={{ antialias: true, alpha: true, preserveDrawingBuffer: true }}
         style={{ background: "transparent" }}
       >
+        <PerspectiveCamera makeDefault position={[0, 5, 30]} fov={60}>
+          <TrailEffect />
+        </PerspectiveCamera>
         <SwirlingGalaxy />
       </Canvas>
     </div>

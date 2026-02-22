@@ -77,7 +77,7 @@ function BreathingStructuredGrid({
 
       // 3. Capsule Sizing & Orientation
       const baseScale = 0.05 + (Math.sin(bx * by + t) * 0.02); 
-      const activeScale = 0.5; 
+      const activeScale = 0.3; 
       const scale = baseScale + (influence * activeScale);
 
       // Stretch into a capsule shape based on influence.
