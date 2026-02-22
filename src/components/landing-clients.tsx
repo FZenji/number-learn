@@ -358,18 +358,18 @@ export function ExpandableBentoCard({
                     </div>
                   )}
                 </div>
-                <div className="bento-modal-footer p-6 lg:padding-x-12 border-t border-[var(--border)] flex justify-end gap-4">
+                <div className="bento-modal-footer p-6 lg:padding-x-12 border-t border-[var(--border)] flex justify-center gap-4">
                   <SignedOut>
-                    <SignUpButton mode="modal">
-                      <button className="landing-btn-google">
-                        <GoogleIcon />
-                        Sign up with Google
-                      </button>
-                    </SignUpButton>
                     <SignUpButton mode="modal">
                       <button className="landing-btn-primary">
                         Get started
                         <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </SignUpButton>
+                    <SignUpButton mode="modal">
+                      <button className="landing-btn-google">
+                        <GoogleIcon />
+                        Sign up with Google
                       </button>
                     </SignUpButton>
                   </SignedOut>

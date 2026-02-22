@@ -44,13 +44,13 @@ export default function HomePage() {
             </p>
             <div className="landing-hero-actions">
               <SignedOut>
+                <GoogleSignUpButton />
                 <SignUpButton mode="modal">
                   <button className="landing-btn-primary">
                     Get started
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </SignUpButton>
-                <GoogleSignUpButton />
               </SignedOut>
               <SignedIn>
                 <Link href="/studio" className="landing-btn-primary">

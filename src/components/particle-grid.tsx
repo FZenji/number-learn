@@ -104,16 +104,12 @@ function BreathingStructuredGrid({
          tempCol.lerp(white, influence * 0.6);
       }
       
-      colourArr[i * 3] = tempCol.r;
-      colourArr[i * 3 + 1] = tempCol.g;
-      colourArr[i * 3 + 2] = tempCol.b;
+      ref.current!.setColorAt(i, tempCol);
     });
 
     ref.current.instanceMatrix.needsUpdate = true;
-    const colAttr = ref.current.geometry.getAttribute("color");
-    if (colAttr) {
-      (colAttr.array as Float32Array).set(colourArr);
-      colAttr.needsUpdate = true;
+    if (ref.current.instanceColor) {
+      ref.current.instanceColor.needsUpdate = true;
     }
   });
 
