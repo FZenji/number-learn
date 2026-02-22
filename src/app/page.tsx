@@ -434,6 +434,110 @@ export default function HomePage() {
         </div>
       </MouseGlowSection>
 
+      {/* ======== PARTICLE GRID INTERLUDE & TOOLKIT ======== */}
+      <section className="landing-section" style={{ position: "relative", overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: 0, bottom: 0, left: 0, right: 0, pointerEvents: "none", zIndex: 0 }}>
+          <ParticleGridLoader />
+        </div>
+
+        {/* Interactive Intro Div */}
+        <div className="landing-container" style={{ position: "relative", zIndex: 1, paddingBottom: "120px" }}>
+          <div className="landing-grid-text" style={{ maxWidth: "600px", margin: "0 auto", textAlign: "center" }}>
+            <p className="landing-overline">Interactive</p>
+            <h2 className="landing-h2-centered">
+              Every element responds to you.
+            </h2>
+            <p className="landing-body-centered">
+              Move your cursor across the grid. Our tools react to your input
+              the same way&nbsp;&mdash; instant feedback, zero latency, total control.
+            </p>
+          </div>
+        </div>
+
+        {/* Toolkit Grid */}
+        <div className="landing-container" style={{ position: "relative", zIndex: 1 }}>
+          <p className="landing-overline">Toolkit</p>
+          <h2 className="landing-h2">
+            Fourteen panel types.
+            <br />
+            One workspace.
+          </h2>
+
+          <div className="landing-toolkit-grid">
+            <ToolkitCard
+              title="Digit Display"
+              desc="View digits with adjustable chunk sizes and highlighting."
+              colour="#6366f1"
+            />
+            <ToolkitCard
+              title="Recall Test"
+              desc="Quiz yourself on digit positions with hidden previews."
+              colour="#8b5cf6"
+            />
+            <ToolkitCard
+              title="Typing Practice"
+              desc="Type digits against a timer with real-time feedback."
+              colour="#06b6d4"
+            />
+            <ToolkitCard
+              title="Chunk Trainer"
+              desc="Flashcard-style mastery for small groups of digits."
+              colour="#ec4899"
+            />
+            <ToolkitCard
+              title="Sequence"
+              desc="Audio-visual playback with an interactive numpad."
+              colour="#3b82f6"
+            />
+            <ToolkitCard
+              title="Major System"
+              desc="Phonetic digit-to-word conversion helper."
+              colour="#f59e0b"
+            />
+            <ToolkitCard
+              title="Piem Generator"
+              desc="Create poems where word lengths encode digits."
+              colour="#22c55e"
+            />
+            <ToolkitCard
+              title="Canvas"
+              desc="Draw diagrams and visual mnemonics freehand."
+              colour="#ef4444"
+            />
+            <ToolkitCard
+              title="Notes"
+              desc="Persistent notes for strategies and observations."
+              colour="#6366f1"
+            />
+            <ToolkitCard
+              title="Timeline"
+              desc="Minimap view of all digits with draggable viewport."
+              colour="#8b5cf6"
+            />
+            <ToolkitCard
+              title="Statistics"
+              desc="Accuracy and speed graphs over time."
+              colour="#06b6d4"
+            />
+            <ToolkitCard
+              title="Achievements"
+              desc="Badges for streaks, speed records, and milestones."
+              colour="#ec4899"
+            />
+            <ToolkitCard
+              title="Progress"
+              desc="Streaks, goals, and daily activity overview."
+              colour="#3b82f6"
+            />
+            <ToolkitCard
+              title="Scratchpad"
+              desc="Ephemeral notes that reset each session."
+              colour="#f59e0b"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* ======== HOW IT WORKS ======== */}
       <section className="landing-section">
         <div className="landing-container">
@@ -669,110 +773,6 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ======== PARTICLE GRID INTERLUDE & TOOLKIT ======== */}
-      <section className="landing-section" style={{ position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: 0, bottom: 0, left: "50%", transform: "translateX(-50%)", width: "100%", maxWidth: "1800px", pointerEvents: "none", zIndex: 0 }}>
-          <ParticleGridLoader />
-        </div>
-        
-        {/* Interactive Intro Div */}
-        <div className="landing-container" style={{ position: "relative", zIndex: 1, paddingBottom: "120px" }}>
-          <div className="landing-grid-text" style={{ maxWidth: "600px", margin: "0 auto", textAlign: "center" }}>
-            <p className="landing-overline">Interactive</p>
-            <h2 className="landing-h2-centered">
-              Every element responds to you.
-            </h2>
-            <p className="landing-body-centered">
-              Move your cursor across the grid. Our tools react to your input
-              the same way&nbsp;&mdash; instant feedback, zero latency, total control.
-            </p>
-          </div>
-        </div>
-
-        {/* Toolkit Grid */}
-        <div className="landing-container" style={{ position: "relative", zIndex: 1 }}>
-          <p className="landing-overline">Toolkit</p>
-          <h2 className="landing-h2">
-            Fourteen panel types.
-            <br />
-            One workspace.
-          </h2>
-
-          <div className="landing-toolkit-grid">
-            <ToolkitCard
-              title="Digit Display"
-              desc="View digits with adjustable chunk sizes and highlighting."
-              colour="#6366f1"
-            />
-            <ToolkitCard
-              title="Recall Test"
-              desc="Quiz yourself on digit positions with hidden previews."
-              colour="#8b5cf6"
-            />
-            <ToolkitCard
-              title="Typing Practice"
-              desc="Type digits against a timer with real-time feedback."
-              colour="#06b6d4"
-            />
-            <ToolkitCard
-              title="Chunk Trainer"
-              desc="Flashcard-style mastery for small groups of digits."
-              colour="#ec4899"
-            />
-            <ToolkitCard
-              title="Sequence"
-              desc="Audio-visual playback with an interactive numpad."
-              colour="#3b82f6"
-            />
-            <ToolkitCard
-              title="Major System"
-              desc="Phonetic digit-to-word conversion helper."
-              colour="#f59e0b"
-            />
-            <ToolkitCard
-              title="Piem Generator"
-              desc="Create poems where word lengths encode digits."
-              colour="#22c55e"
-            />
-            <ToolkitCard
-              title="Canvas"
-              desc="Draw diagrams and visual mnemonics freehand."
-              colour="#ef4444"
-            />
-            <ToolkitCard
-              title="Notes"
-              desc="Persistent notes for strategies and observations."
-              colour="#6366f1"
-            />
-            <ToolkitCard
-              title="Timeline"
-              desc="Minimap view of all digits with draggable viewport."
-              colour="#8b5cf6"
-            />
-            <ToolkitCard
-              title="Statistics"
-              desc="Accuracy and speed graphs over time."
-              colour="#06b6d4"
-            />
-            <ToolkitCard
-              title="Achievements"
-              desc="Badges for streaks, speed records, and milestones."
-              colour="#ec4899"
-            />
-            <ToolkitCard
-              title="Progress"
-              desc="Streaks, goals, and daily activity overview."
-              colour="#3b82f6"
-            />
-            <ToolkitCard
-              title="Scratchpad"
-              desc="Ephemeral notes that reset each session."
-              colour="#f59e0b"
-            />
           </div>
         </div>
       </section>

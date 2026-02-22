@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useMemo, useCallback } from "react";
+import { useRef, useMemo, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -32,12 +32,11 @@ function BreathingStructuredGrid({
     return arr;
   }, []);
 
-  const colourArr = useMemo(() => new Float32Array(COUNT * 3), []);
   const purple = useMemo(() => new THREE.Color("#6366f1"), []);
   const cyan = useMemo(() => new THREE.Color("#06b6d4"), []);
   const pink = useMemo(() => new THREE.Color("#ec4899"), []);
-  const white = useMemo(() => new THREE.Color("#ffffff"), []);
   const tempCol = useMemo(() => new THREE.Color(), []);
+  const materialReady = useRef(false);
 
   useFrame((state) => {
     if (!ref.current) return;
@@ -92,16 +91,33 @@ function BreathingStructuredGrid({
       dummy.updateMatrix();
       ref.current!.setMatrixAt(i, dummy.matrix);
 
-      // 4. Color Gradient
+      // 4. Animated Color Gradient
       const xRatio = (bx + (COLS * SPACING) / 2) / (COLS * SPACING); // 0 to 1
       const yRatio = (by + (ROWS * SPACING) / 2) / (ROWS * SPACING); // 0 to 1
-      
-      // Full grid gradient: mix purple, cyan, pink smoothly
-      tempCol.copy(purple).lerp(cyan, xRatio).lerp(pink, yRatio);
-      
-      // Brighten up when influenced by mouse
+
+      // Animated diagonal parameter (0 → 1 across the grid, drifting over time)
+      const drift = t * 0.15;
+      const diag = (xRatio * 0.5 + yRatio * 0.5)
+        + Math.sin(xRatio * Math.PI * 2 + drift) * 0.12
+        + Math.cos(yRatio * Math.PI * 2 - drift * 0.7) * 0.12;
+      // Clamp to 0–1
+      const p = Math.min(1, Math.max(0, diag));
+
+      // Smooth three-stop gradient: purple (0) → cyan (0.5) → pink (1)
+      if (p < 0.5) {
+        const seg = p * 2; // 0–1 within first half
+        tempCol.copy(purple).lerp(cyan, seg);
+      } else {
+        const seg = (p - 0.5) * 2; // 0–1 within second half
+        tempCol.copy(cyan).lerp(pink, seg);
+      }
+
+      // Subtly brighten when influenced by mouse, preserving hue
       if (influence > 0) {
-         tempCol.lerp(white, influence * 0.6);
+         const boost = 1 + influence * 0.35;
+         tempCol.r = Math.min(tempCol.r * boost, 1);
+         tempCol.g = Math.min(tempCol.g * boost, 1);
+         tempCol.b = Math.min(tempCol.b * boost, 1);
       }
       
       ref.current!.setColorAt(i, tempCol);
@@ -111,25 +127,26 @@ function BreathingStructuredGrid({
     if (ref.current.instanceColor) {
       ref.current.instanceColor.needsUpdate = true;
     }
+
+    // On first frame, force material to recompile now that instanceColor exists.
+    // Without this, the shader compiles before setColorAt creates the buffer,
+    // so USE_INSTANCING_COLOR is never enabled and all capsules render white.
+    if (!materialReady.current) {
+      materialReady.current = true;
+      (ref.current.material as THREE.Material).needsUpdate = true;
+    }
   });
 
   const geo = useMemo(() => {
     // A capsule geometry. Radius 0.5, length 1 so it's noticeably oblong when scaled Y.
-    const g = new THREE.CapsuleGeometry(0.5, 1, 4, 8);
-    const colors = new Float32Array(COUNT * 3);
-    colors.fill(1); 
-    return g;
+    return new THREE.CapsuleGeometry(0.5, 1, 4, 8);
   }, []);
 
   return (
     <instancedMesh ref={ref} args={[geo, undefined, COUNT]}>
-      <meshStandardMaterial
-        vertexColors
-        emissive="#ffffff"
-        emissiveIntensity={0.6}
+      <meshBasicMaterial
         transparent
-        opacity={0.8}
-        roughness={0.2}
+        opacity={0.85}
       />
     </instancedMesh>
   );
@@ -137,27 +154,35 @@ function BreathingStructuredGrid({
 
 export default function ParticleGrid() {
   const mouse = useRef({ x: 0, y: 0 });
+  const wrapRef = useRef<HTMLDivElement>(null);
 
-  const handlePointerMove = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      const r = e.currentTarget.getBoundingClientRect();
-      mouse.current.x = ((e.clientX - r.left) / r.width) * 2 - 1;
-      mouse.current.y = -((e.clientY - r.top) / r.height) * 2 + 1;
-    },
-    []
-  );
-
-  const handlePointerLeave = useCallback(() => {
-     // Move mouse interaction far away when off-canvas
-     mouse.current.x = -1000;
-     mouse.current.y = -1000;
+  useEffect(() => {
+    const onMove = (e: PointerEvent) => {
+      const el = wrapRef.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      // Check if pointer is within the element bounds
+      if (
+        e.clientX >= r.left &&
+        e.clientX <= r.right &&
+        e.clientY >= r.top &&
+        e.clientY <= r.bottom
+      ) {
+        mouse.current.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+        mouse.current.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+      } else {
+        mouse.current.x = -1000;
+        mouse.current.y = -1000;
+      }
+    };
+    window.addEventListener("pointermove", onMove);
+    return () => window.removeEventListener("pointermove", onMove);
   }, []);
 
   return (
-    <div 
-      className="particle-grid-wrap" 
-      onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
+    <div
+      className="particle-grid-wrap"
+      ref={wrapRef}
     >
       <Canvas
         camera={{ position: [0, 0, 15], fov: 60 }}
@@ -165,10 +190,6 @@ export default function ParticleGrid() {
         gl={{ antialias: true, alpha: true }}
         style={{ background: "transparent" }}
       >
-        <ambientLight intensity={0.5} />
-        <pointLight position={[0, 0, 10]} intensity={1.5} color="#ec4899" />
-        <pointLight position={[-20, 10, -5]} intensity={1} color="#06b6d4" />
-        <pointLight position={[20, -10, -5]} intensity={1} color="#6366f1" />
         <BreathingStructuredGrid mouse={mouse} />
       </Canvas>
     </div>
