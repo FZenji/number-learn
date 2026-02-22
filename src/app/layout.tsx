@@ -167,10 +167,11 @@ export default function RootLayout({
         <body
           className={`${geistSans.className} ${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-[var(--surface)] border-b border-[var(--border)]">
-            <a href="/" className="text-lg font-semibold tracking-tight">
-              Number<span className="text-[var(--primary)]">Learn</span>
-            </a>
+          <header className="fixed top-0 left-0 right-0 z-50 flex justify-center bg-[var(--surface)] border-b border-[var(--border)]">
+            <div className="w-full max-w-[1200px] flex items-center justify-between px-6 py-4">
+              <a href="/" className="text-lg font-semibold tracking-tight">
+                Number<span className="text-[var(--primary)]">Learn</span>
+              </a>
             <nav className="flex items-center gap-4">
               <SignedOut>
                 <SignInButton mode="modal">
@@ -197,6 +198,7 @@ export default function RootLayout({
                 />
               </SignedIn>
             </nav>
+            </div>
           </header>
           <main className="pt-[72px]">
             {children}
