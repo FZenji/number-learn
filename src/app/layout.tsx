@@ -1,15 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
-import {
-  ClerkProvider,
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
+import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
+import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -167,39 +160,7 @@ export default function RootLayout({
         <body
           className={`${geistSans.className} ${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <header className="fixed top-0 left-0 right-0 z-50 flex justify-center bg-[var(--surface)] border-b border-[var(--border)]">
-            <div className="w-full max-w-[1200px] flex items-center justify-between px-6 py-4">
-              <a href="/" className="text-lg font-semibold tracking-tight">
-                Number<span className="text-[var(--primary)]">Learn</span>
-              </a>
-            <nav className="flex items-center gap-4">
-              <SignedOut>
-                <SignInButton mode="modal">
-                  <button className="btn btn-ghost">Sign In</button>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <button className="btn btn-primary">Get Started</button>
-                </SignUpButton>
-              </SignedOut>
-              <SignedIn>
-                <Link href="/studio" className="btn btn-primary">
-                  Studio
-                </Link>
-                <a href="/contact" target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
-                  Contact
-                </a>
-                <UserButton 
-                  afterSignOutUrl="/"
-                  appearance={{
-                    elements: {
-                      avatarBox: "w-9 h-9"
-                    }
-                  }}
-                />
-              </SignedIn>
-            </nav>
-            </div>
-          </header>
+          <SiteHeader />
           <main className="pt-[72px]">
             {children}
           </main>
